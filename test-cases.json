@@ -1,0 +1,100 @@
+{
+    "testCases": [
+        {
+            "id": "TC-001",
+            "category": "General Forecast",
+            "description": "Basic weather forecast for a city",
+            "query": "Quel temps fait-il à Paris demain ?",
+            "expectedFocus": "all",
+            "expectedIntent": "forecast"
+        },
+        {
+            "id": "TC-002",
+            "category": "General Forecast",
+            "description": "General weather for a 5-day period (should trigger daily view)",
+            "query": "Météo à Lyon pour les 5 prochains jours",
+            "expectedFocus": "all",
+            "expectedIntent": "forecast",
+            "expectedView": "daily"
+        },
+        {
+            "id": "TC-003",
+            "category": "Metric Focus - Wind",
+            "description": "Specific query for wind speed",
+            "query": "Quel est le vent prévu à Marseille cet après-midi ?",
+            "expectedFocus": "wind",
+            "expectedView": "hourly"
+        },
+        {
+            "id": "TC-004",
+            "category": "Metric Focus - Wind",
+            "description": "Wind query for a long period (should trigger daily/range view)",
+            "query": "Prévisions du vent à Brest pour la semaine prochaine",
+            "expectedFocus": "wind",
+            "expectedView": "daily"
+        },
+        {
+            "id": "TC-005",
+            "category": "Metric Focus - Temperature",
+            "description": "Specific query for temperature",
+            "query": "Est-ce qu'il va faire chaud à Nice demain ?",
+            "expectedFocus": "temperature"
+        },
+        {
+            "id": "TC-006",
+            "category": "Metric Focus - Humidity",
+            "description": "Specific query for humidity",
+            "query": "Quel est le taux d'humidité à Bordeaux ?",
+            "expectedFocus": "humidity"
+        },
+        {
+            "id": "TC-007",
+            "category": "Metric Focus - Pressure",
+            "description": "Specific query for atmospheric pressure",
+            "query": "Donne moi la pression atmosphérique à Lille",
+            "expectedFocus": "pressure"
+        },
+        {
+            "id": "TC-008",
+            "category": "Historical Data",
+            "description": "Weather for a specific past date",
+            "query": "Quel temps faisait-il à Paris le 15 janvier 2024 ?",
+            "expectedIntent": "historical"
+        },
+        {
+            "id": "TC-009",
+            "category": "Historical Data",
+            "description": "Wind for a past date",
+            "query": "Quel était le vent à Dunkerque le 1er février dernier ?",
+            "expectedIntent": "historical",
+            "expectedFocus": "wind"
+        },
+        {
+            "id": "TC-010",
+            "category": "Edge Case - Invalid Location",
+            "description": "Query for a non-existent or ambiguous place",
+            "query": "Météo à GoogleLand",
+            "expectedErrorHandling": true
+        },
+        {
+            "id": "TC-011",
+            "category": "Edge Case - Future Limit",
+            "description": "Query too far in the future",
+            "query": "Quel temps fera-t-il à Paris en 2030 ?",
+            "expectedErrorHandling": true
+        },
+        {
+            "id": "TC-012",
+            "category": "Multi-Metric Ambiguity",
+            "description": "Query mentioning multiple specific metrics",
+            "query": "Donne moi le vent et la température à Strasbourg",
+            "expectedFocus": "all",
+            "note": "Should fallback to general card because multiple focuses are requested"
+        }
+    ],
+    "metadata": {
+        "version": "1.0.0",
+        "targetApp": "wearther-agent",
+        "totalCases": 12
+    }
+}

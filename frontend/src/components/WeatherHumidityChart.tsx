@@ -4,9 +4,11 @@ import {
     LinearScale,
     PointElement,
     LineElement,
+    BarElement,
     Tooltip,
+    Legend,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Chart } from "react-chartjs-2";
 import type { HourlyEntry } from "../api/types";
 import type { DailyAggregate } from "../lib/aggregateByDay";
 import styles from "../styles/weather-card.module.css";
@@ -16,7 +18,9 @@ ChartJS.register(
     LinearScale,
     PointElement,
     LineElement,
-    Tooltip
+    BarElement,
+    Tooltip,
+    Legend
 );
 
 interface Props {
@@ -33,10 +37,18 @@ export default function WeatherHumidityChart({ entries, mode }: Props) {
         return d.toLocaleDateString(undefined, { weekday: "short" });
     });
 
+    const precipData = entries.map((e) => {
+        if (mode === "daily" && "precipitation_sum_mm" in e) {
+            return (e as DailyAggregate).precipitation_sum_mm;
+        }
+        return (e as any).precipitation_mm;
+    });
+
     const data = {
         labels,
         datasets: [
             {
+                type: "line" as const,
                 label: "Humidity (%)",
                 data: entries.map((e) => e.relative_humidity_percent),
                 borderColor: "#64B5F6",
@@ -45,6 +57,16 @@ export default function WeatherHumidityChart({ entries, mode }: Props) {
                 tension: 0.4,
                 pointRadius: 2,
                 fill: true,
+            },
+            {
+                type: "bar" as const,
+                label: "Pluie (mm)",
+                data: precipData,
+                backgroundColor: "rgba(33, 150, 243, 0.4)",
+                borderColor: "rgba(33, 150, 243, 0.8)",
+                borderWidth: 1,
+                yAxisID: "y1",
+                borderRadius: 2,
             },
         ],
     };
@@ -73,13 +95,33 @@ export default function WeatherHumidityChart({ entries, mode }: Props) {
                 },
                 grid: { color: "rgba(255,255,255,0.1)" },
             },
+            y1: {
+                type: "linear" as const,
+                position: "right" as const,
+                beginAtZero: true,
+                display: true,
+                grid: { drawOnChartArea: false },
+                ticks: {
+                    color: "#4FC3F7",
+                    font: { size: 10 },
+                    callback: (v: string | number) => `${v}mm`,
+                },
+                title: {
+                    display: true,
+                    text: "mm",
+                    color: "#4FC3F7",
+                    font: { size: 10 },
+                },
+            },
         },
     };
 
     return (
         <div className={styles.chartSection}>
-            <div className={styles.chartTitle} style={{ color: "#64B5F6" }}>Humidity Trend (%)</div>
-            <Line data={data} options={options} />
+            <div className={styles.chartTitle} style={{ color: "#64B5F6" }}>
+                {mode === "daily" ? "Daily Humidity & Rain" : "Hourly Humidity & Rain"}
+            </div>
+            <Chart type="bar" data={data} options={options as any} />
         </div>
     );
 }

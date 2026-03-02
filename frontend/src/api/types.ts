@@ -32,6 +32,7 @@ export interface HourlyEntry {
   wind_gusts_knots: number;
   wind_direction_degrees: number;
   surface_pressure_hpa: number;
+  precipitation_mm: number;
   weather_code: number;
   conditions: string;
 }
