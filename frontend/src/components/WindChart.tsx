@@ -65,7 +65,7 @@ const windDataLabelsPlugin: Plugin<"bar"> = {
     if (!meta?.data?.length) return;
 
     const ctx = chart.ctx;
-    const sustains: number[] = (chart.options as any)._sustains ?? [];
+    const averages: number[] = (chart.options as any)._averages ?? [];
     const gusts: number[] = (chart.options as any)._gusts ?? [];
 
     ctx.save();
@@ -75,25 +75,25 @@ const windDataLabelsPlugin: Plugin<"bar"> = {
 
     meta.data.forEach((bar, i) => {
       const gust = gusts[i];
-      const sustain = sustains[i];
-      if (gust == null || sustain == null) return;
+      const avgValue = averages[i];
+      if (gust == null || avgValue == null) return;
 
       const x = bar.x;
       const yTop = bar.y; // Max (Gust)
-      const yBottom = (bar as any).base; // Min (Sustain)
+      const yBottom = (bar as any).base; // Average
 
       // Draw Gust (Max) value on top
       ctx.fillStyle = "#fff";
       ctx.fillText(`${gust}`, x, yTop - 18); // above the arrow
 
-      // Draw Sustain (Min/Avg) value at the base of the bar
-      if (gust !== sustain) {
+      // Draw Average value at the base of the bar
+      if (gust !== avgValue) {
         ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
         ctx.font = "9px sans-serif";
         // If the bar is tall enough, draw inside at the bottom, otherwise below
         const height = yBottom - yTop;
         const labelY = height > 15 ? yBottom - 4 : yBottom + 12;
-        ctx.fillText(`${sustain}`, x, labelY);
+        ctx.fillText(`${avgValue}`, x, labelY);
       }
     });
     ctx.restore();
@@ -110,9 +110,9 @@ export default function WindChart({ entries, mode }: Props) {
     return d.toLocaleDateString(undefined, { weekday: "short" });
   });
 
-  const minSpeedKnots = entries.map((e) => {
-    return mode === "daily" && "wind_speed_min" in e
-      ? (e as DailyAggregate).wind_speed_min
+  const avgSpeedKnots = entries.map((e) => {
+    return mode === "daily" && "wind_speed_knots" in e
+      ? (e as DailyAggregate).wind_speed_knots
       : (e as any).wind_speed_knots;
   });
 
@@ -130,11 +130,11 @@ export default function WindChart({ entries, mode }: Props) {
     datasets: [
       {
         label: "Wind Range (kt)",
-        // Floating bars: [min, max]
-        data: entries.map((_, i) => [minSpeedKnots[i], maxGustsKnots[i]] as any),
+        // Floating bars: [avg, max]
+        data: entries.map((_, i) => [avgSpeedKnots[i], maxGustsKnots[i]] as any),
         backgroundColor: barColors,
         borderRadius: 3,
-        borderSkipped: false, // Ensure both ends are rounded if desired (or at least drawn)
+        borderSkipped: false,
       },
     ],
   };
@@ -149,11 +149,11 @@ export default function WindChart({ entries, mode }: Props) {
         callbacks: {
           label(ctx: any) {
             const i = ctx.dataIndex;
-            const min = minSpeedKnots[i];
+            const avg = avgSpeedKnots[i];
             const max = maxGustsKnots[i];
             const dir = directions[i];
             const cardinal = degreesToCardinal(dir);
-            return `${min}-${max} kt ${cardinal} (${dir}°)`;
+            return `Avg: ${avg}, Max: ${max} kt ${cardinal} (${dir}°)`;
           },
         },
       },
@@ -180,13 +180,15 @@ export default function WindChart({ entries, mode }: Props) {
     },
     // Stash data for plugins
     _windDirections: directions,
-    _sustains: minSpeedKnots,
+    _averages: avgSpeedKnots,
     _gusts: maxGustsKnots,
   } as any;
 
   const bands = getWindBands();
 
-  const minSpeed = minSpeedKnots.length > 0 ? Math.min(...minSpeedKnots) : 0;
+  const totalAvg = avgSpeedKnots.length > 0
+    ? Math.round((avgSpeedKnots.reduce((a, b) => a + b, 0) / avgSpeedKnots.length) * 10) / 10
+    : 0;
   const maxSpeed = maxGustsKnots.length > 0 ? Math.max(...maxGustsKnots) : 0;
 
   return (
@@ -196,7 +198,7 @@ export default function WindChart({ entries, mode }: Props) {
           {mode === "hourly" ? "Hourly Wind (kt)" : "Daily Wind (kt)"}
         </div>
         <div style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.9)", fontWeight: 500, paddingBottom: 2 }}>
-          Min: <span style={{ color: "#64B5F6" }}>{minSpeed}</span> | Max: <span style={{ color: "#EF5350" }}>{maxSpeed}</span>
+          Moyen: <span style={{ color: "#64B5F6" }}>{totalAvg}</span> | Max: <span style={{ color: "#EF5350" }}>{maxSpeed}</span>
         </div>
       </div>
       <Bar data={data} options={options} plugins={[windArrowPlugin, windDataLabelsPlugin]} />
