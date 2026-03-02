@@ -138,11 +138,13 @@ export default function WindChart({ entries, mode }: Props) {
 
   return (
     <div className={styles.chartSection}>
-      <div className={styles.chartTitle} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span>{mode === "hourly" ? "Hourly Wind" : "Daily Wind"}</span>
-        <span style={{ fontSize: "0.85em", opacity: 0.8, fontWeight: "normal" }}>
-          Min: {minSpeed} kt | Max: {maxSpeed} kt
-        </span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12 }}>
+        <div className={styles.chartTitle} style={{ margin: 0 }}>
+          {mode === "hourly" ? "Hourly Wind (kt)" : "Daily Wind (kt)"}
+        </div>
+        <div style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.9)", fontWeight: 500, paddingBottom: 2 }}>
+          Min: <span style={{ color: "#64B5F6" }}>{minSpeed}</span> | Max: <span style={{ color: "#EF5350" }}>{maxSpeed}</span>
+        </div>
       </div>
       <Bar data={data} options={options} plugins={[windArrowPlugin]} />
       <div
