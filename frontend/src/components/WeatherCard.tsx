@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import type { DailyWeatherData } from "../api/types";
 import { getIconGroup, describeWeatherCode } from "../lib/weatherCodes";
 import { aggregateByDay } from "../lib/aggregateByDay";
-import { kmhToKnots } from "../lib/windColors";
 import WeatherIcon from "./WeatherIcon";
 import WeatherHourlyChart from "./WeatherHourlyChart";
 import WindChart from "./WindChart";
@@ -78,7 +77,7 @@ export default function WeatherCard({ data }: Props) {
         </div>
         <div className={styles.detailItem}>
           <span className={styles.detailLabel}>Wind</span>
-          <span>{kmhToKnots(hero.wind_speed_kmh)} kt</span>
+          <span>{hero.wind_speed_knots} kt</span>
         </div>
         <div className={styles.detailItem}>
           <span className={styles.detailLabel}>Time</span>

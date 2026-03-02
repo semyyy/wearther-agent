@@ -12,7 +12,7 @@ import {
 import { Bar } from "react-chartjs-2";
 import type { HourlyEntry } from "../api/types";
 import type { DailyAggregate } from "../lib/aggregateByDay";
-import { windSpeedColor, getWindBands, degreesToCardinal, kmhToKnots } from "../lib/windColors";
+import { windSpeedColor, getWindBands, degreesToCardinal } from "../lib/windColors";
 import styles from "../styles/weather-card.module.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -107,27 +107,21 @@ export default function WindChart({ entries, mode }: Props) {
   });
 
   const speedsKnots = entries.map((e) => {
-    const kmh =
-      mode === "daily" && "wind_speed_max" in e
-        ? (e as DailyAggregate).wind_speed_max
-        : e.wind_speed_kmh;
-    return kmhToKnots(kmh);
+    return mode === "daily" && "wind_speed_max" in e
+      ? (e as DailyAggregate).wind_speed_max
+      : (e as any).wind_speed_knots;
   });
 
   const minSpeedKnots = entries.map((e) => {
-    const kmh =
-      mode === "daily" && "wind_speed_min" in e
-        ? (e as DailyAggregate).wind_speed_min
-        : e.wind_speed_kmh;
-    return kmhToKnots(kmh);
+    return mode === "daily" && "wind_speed_min" in e
+      ? (e as DailyAggregate).wind_speed_min
+      : (e as any).wind_speed_knots;
   });
 
   const maxGustsKnots = entries.map((e) => {
-    const kmhToUse =
-      mode === "daily" && "wind_gusts_max" in e
-        ? (e as DailyAggregate).wind_gusts_max
-        : ("wind_gusts_kmh" in e ? e.wind_gusts_kmh : e.wind_speed_kmh);
-    return kmhToKnots(kmhToUse);
+    return mode === "daily" && "wind_gusts_max" in e
+      ? (e as DailyAggregate).wind_gusts_max
+      : ("wind_gusts_knots" in e ? (e as any).wind_gusts_knots : (e as any).wind_speed_knots);
   });
 
   const directions = entries.map((e) => e.wind_direction_degrees);

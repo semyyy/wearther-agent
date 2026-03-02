@@ -1,8 +1,3 @@
-/** Converts km/h to knots */
-export function kmhToKnots(kmh: number): number {
-  return Math.round(kmh * 0.539957 * 10) / 10;
-}
-
 /** Wind speed color bands in knots */
 const WIND_BANDS = [
   { max: 5, color: "#64B5F6", label: "Calm" },

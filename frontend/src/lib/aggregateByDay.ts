@@ -7,7 +7,7 @@ export interface DailyAggregate {
   temperature_max: number;
   temperature_min: number;
   relative_humidity_percent: number;
-  wind_speed_kmh: number;
+  wind_speed_knots: number;
   wind_speed_min: number;
   wind_speed_max: number;
   wind_gusts_max: number;
@@ -35,8 +35,8 @@ export function aggregateByDay(entries: HourlyEntry[]): DailyAggregate[] {
   for (const [date, group] of grouped) {
     const temps = group.map((e) => e.temperature_celsius);
     const humidities = group.map((e) => e.relative_humidity_percent);
-    const speeds = group.map((e) => e.wind_speed_kmh);
-    const gusts = group.map((e) => e.wind_gusts_kmh ?? e.wind_speed_kmh);
+    const speeds = group.map((e) => e.wind_speed_knots);
+    const gusts = group.map((e) => e.wind_gusts_knots ?? e.wind_speed_knots);
 
     // Circular mean for wind direction via atan2
     let sinSum = 0;
@@ -75,7 +75,7 @@ export function aggregateByDay(entries: HourlyEntry[]): DailyAggregate[] {
       temperature_max: Math.max(...temps),
       temperature_min: Math.min(...temps),
       relative_humidity_percent: Math.round(avg(humidities)),
-      wind_speed_kmh: Math.round(avg(speeds) * 10) / 10,
+      wind_speed_knots: Math.round(avg(speeds) * 10) / 10,
       wind_speed_min: Math.min(...speeds),
       wind_speed_max: Math.max(...speeds),
       wind_gusts_max: Math.max(...gusts),

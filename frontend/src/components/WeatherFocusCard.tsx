@@ -1,5 +1,4 @@
 import type { DailyWeatherData } from "../api/types";
-import { kmhToKnots } from "../lib/windColors";
 import WeatherTemperatureChart from "./WeatherTemperatureChart";
 import WeatherHumidityChart from "./WeatherHumidityChart";
 import WeatherPressureChart from "./WeatherPressureChart";
@@ -31,8 +30,8 @@ export default function WeatherFocusCard({ data }: Props) {
             ChartComponent = <WeatherTemperatureChart entries={entries} />;
             break;
         case "wind":
-            title = "Wind";
-            value = `${kmhToKnots(hero.wind_speed_kmh)} kt`;
+            title = "Wind Speed";
+            value = `${hero.wind_speed_knots} kt`;
             ChartComponent = <WindChart entries={entries} mode="hourly" />;
             break;
         case "humidity":

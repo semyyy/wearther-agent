@@ -28,8 +28,8 @@ export interface HourlyEntry {
   time: string;
   temperature_celsius: number;
   relative_humidity_percent: number;
-  wind_speed_kmh: number;
-  wind_gusts_kmh: number;
+  wind_speed_knots: number;
+  wind_gusts_knots: number;
   wind_direction_degrees: number;
   surface_pressure_hpa: number;
   weather_code: number;
