@@ -133,10 +133,16 @@ export default function WindChart({ entries, mode }: Props) {
 
   const bands = getWindBands();
 
+  const minSpeed = speedsKnots.length > 0 ? Math.min(...speedsKnots) : 0;
+  const maxSpeed = speedsKnots.length > 0 ? Math.max(...speedsKnots) : 0;
+
   return (
     <div className={styles.chartSection}>
-      <div className={styles.chartTitle}>
-        {mode === "hourly" ? "Hourly Wind" : "Daily Wind"}
+      <div className={styles.chartTitle} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span>{mode === "hourly" ? "Hourly Wind" : "Daily Wind"}</span>
+        <span style={{ fontSize: "0.85em", opacity: 0.8, fontWeight: "normal" }}>
+          Min: {minSpeed} kt | Max: {maxSpeed} kt
+        </span>
       </div>
       <Bar data={data} options={options} plugins={[windArrowPlugin]} />
       <div
