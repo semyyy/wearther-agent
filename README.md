@@ -46,6 +46,11 @@ npm run dev
 
 Open http://localhost:5173 in your browser.
 
+### Testing the Backend
+
+You can also test the backend multi-agent logic separately (without the main frontend) using the built-in development UI:
+- **URL**: http://localhost:8000/dev-ui
+
 ## Stop
 
 Press `Ctrl+C` in each terminal to stop the respective process.
