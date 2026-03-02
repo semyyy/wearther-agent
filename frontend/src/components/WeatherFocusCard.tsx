@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import type { DailyWeatherData } from "../api/types";
+import { aggregateByDay } from "../lib/aggregateByDay";
 import WeatherTemperatureChart from "./WeatherTemperatureChart";
 import WeatherHumidityChart from "./WeatherHumidityChart";
 import WeatherPressureChart from "./WeatherPressureChart";
@@ -11,13 +13,22 @@ interface Props {
 
 export default function WeatherFocusCard({ data }: Props) {
     const entries = data.data;
-    if (!entries.length || !data.focus || data.focus === "all") return null;
+    const focus = data.focus;
+
+    const uniqueDates = useMemo(() => {
+        const dates = new Set(entries.map((e) => e.time.slice(0, 10)));
+        return dates.size;
+    }, [entries]);
+
+    const isDaily = uniqueDates > 3;
+    const chartEntries = useMemo(() => isDaily ? aggregateByDay(entries) : entries, [entries, isDaily]);
+    const mode = isDaily ? "daily" : "hourly";
+
+    if (!entries.length || !focus || focus === "all") return null;
 
     // Use the midday entry (or first available) as the "hero" value
     const hero =
         entries.find((e) => new Date(e.time).getHours() === 12) ?? entries[0];
-
-    const focus = data.focus;
 
     let title = "";
     let value = "";
@@ -27,22 +38,22 @@ export default function WeatherFocusCard({ data }: Props) {
         case "temperature":
             title = "Temperature";
             value = `${Math.round(hero.temperature_celsius)}°C`;
-            ChartComponent = <WeatherTemperatureChart entries={entries} />;
+            ChartComponent = <WeatherTemperatureChart entries={chartEntries} mode={mode} />;
             break;
         case "wind":
             title = "Wind Speed";
             value = `${hero.wind_speed_knots} kt`;
-            ChartComponent = <WindChart entries={entries} mode="hourly" />;
+            ChartComponent = <WindChart entries={chartEntries} mode={mode} />;
             break;
         case "humidity":
             title = "Humidity";
             value = `${hero.relative_humidity_percent}%`;
-            ChartComponent = <WeatherHumidityChart entries={entries} />;
+            ChartComponent = <WeatherHumidityChart entries={chartEntries} mode={mode} />;
             break;
         case "pressure":
             title = "Surface Pressure";
             value = `${Math.round(hero.surface_pressure_hpa)} hPa`;
-            ChartComponent = <WeatherPressureChart entries={entries} />;
+            ChartComponent = <WeatherPressureChart entries={chartEntries} mode={mode} />;
             break;
     }
 

@@ -14,6 +14,7 @@ export interface DailyAggregate {
   wind_direction_degrees: number;
   weather_code: number;
   conditions: string;
+  surface_pressure_hpa: number;
 }
 
 /** Groups hourly entries by date and produces one aggregate per day */
@@ -37,6 +38,7 @@ export function aggregateByDay(entries: HourlyEntry[]): DailyAggregate[] {
     const humidities = group.map((e) => e.relative_humidity_percent);
     const speeds = group.map((e) => e.wind_speed_knots);
     const gusts = group.map((e) => e.wind_gusts_knots ?? e.wind_speed_knots);
+    const pressures = group.map((e) => e.surface_pressure_hpa);
 
     // Circular mean for wind direction via atan2
     let sinSum = 0;
@@ -82,6 +84,7 @@ export function aggregateByDay(entries: HourlyEntry[]): DailyAggregate[] {
       wind_direction_degrees: Math.round(meanDir),
       weather_code: dominantCode,
       conditions: group.find((e) => e.weather_code === dominantCode)?.conditions ?? "",
+      surface_pressure_hpa: Math.round(avg(pressures) * 10) / 10,
     });
   }
 

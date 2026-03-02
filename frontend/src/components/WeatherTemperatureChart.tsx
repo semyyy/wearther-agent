@@ -8,6 +8,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import type { HourlyEntry } from "../api/types";
+import type { DailyAggregate } from "../lib/aggregateByDay";
 import styles from "../styles/weather-card.module.css";
 
 ChartJS.register(
@@ -19,21 +20,32 @@ ChartJS.register(
 );
 
 interface Props {
-    entries: HourlyEntry[];
+    entries: (HourlyEntry | DailyAggregate)[];
+    mode: "hourly" | "daily";
 }
 
-export default function WeatherTemperatureChart({ entries }: Props) {
+export default function WeatherTemperatureChart({ entries, mode }: Props) {
     const labels = entries.map((e) => {
         const d = new Date(e.time);
-        return `${d.getHours().toString().padStart(2, "0")}:00`;
+        if (mode === "hourly") {
+            return `${d.getHours().toString().padStart(2, "0")}:00`;
+        }
+        return d.toLocaleDateString(undefined, { weekday: "short" });
+    });
+
+    const temperatureData = entries.map((e) => {
+        if (mode === "daily" && "temperature_max" in e) {
+            return (e as DailyAggregate).temperature_max;
+        }
+        return (e as any).temperature_celsius;
     });
 
     const data = {
         labels,
         datasets: [
             {
-                label: "Temperature (°C)",
-                data: entries.map((e) => e.temperature_celsius),
+                label: mode === "daily" ? "Max Temperature (°C)" : "Temperature (°C)",
+                data: temperatureData,
                 borderColor: "#FFD93D",
                 backgroundColor: "rgba(255, 217, 61, 0.2)",
                 yAxisID: "y",

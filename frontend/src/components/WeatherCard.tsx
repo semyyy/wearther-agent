@@ -21,7 +21,7 @@ export default function WeatherCard({ data }: Props) {
     return dates.size;
   }, [entries]);
 
-  const isWeekly = uniqueDates > 1;
+  const isWeekly = uniqueDates > 3;
 
   const dailyAggregates = useMemo(
     () => (isWeekly ? aggregateByDay(entries) : []),

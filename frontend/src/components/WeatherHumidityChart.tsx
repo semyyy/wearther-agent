@@ -8,6 +8,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import type { HourlyEntry } from "../api/types";
+import type { DailyAggregate } from "../lib/aggregateByDay";
 import styles from "../styles/weather-card.module.css";
 
 ChartJS.register(
@@ -19,13 +20,17 @@ ChartJS.register(
 );
 
 interface Props {
-    entries: HourlyEntry[];
+    entries: (HourlyEntry | DailyAggregate)[];
+    mode: "hourly" | "daily";
 }
 
-export default function WeatherHumidityChart({ entries }: Props) {
+export default function WeatherHumidityChart({ entries, mode }: Props) {
     const labels = entries.map((e) => {
         const d = new Date(e.time);
-        return `${d.getHours().toString().padStart(2, "0")}:00`;
+        if (mode === "hourly") {
+            return `${d.getHours().toString().padStart(2, "0")}:00`;
+        }
+        return d.toLocaleDateString(undefined, { weekday: "short" });
     });
 
     const data = {
