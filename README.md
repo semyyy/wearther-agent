@@ -2,10 +2,20 @@
 
 Multi-agent weather assistant built with Google ADK and a React frontend.
 
-## Prerequisites
+## Configuration
 
-- Node.js 18+
-- A Google AI API key in `.env` (`GOOGLE_API_KEY=...`)
+Before starting, you need to set up your environment variables. 
+
+1. Copy the example file:
+   ```bash
+   cp .env.example .env
+   ```
+2. Open `.env` and add your **Google AI API key**:
+   ```env
+   GOOGLE_API_KEY=your_actual_key_here
+   ```
+
+You can also configure the `MODEL` (e.g., `gemini-2.0-flash`) and `LOG_LEVEL` if needed.
 
 ## Install
 
