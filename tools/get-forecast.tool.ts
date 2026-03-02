@@ -32,7 +32,7 @@ export const getForecastTool = new FunctionTool({
       ),
   }),
   execute: async ({ latitude, longitude, date, hour, focus }, toolContext?: ToolContext) => {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,surface_pressure&timezone=auto`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,surface_pressure,wind_gusts_10m&timezone=auto`;
 
     logger.info(`[get_weather_forecast] Fetching forecast for (${latitude}, ${longitude}), date=${date ?? "all"}, hour=${hour ?? "all"}`);
     logger.debug(`[get_weather_forecast] Request URL: ${url}`);
@@ -59,6 +59,7 @@ export const getForecastTool = new FunctionTool({
       relative_humidity_percent: hourly.relative_humidity_2m[i],
       wind_speed_kmh: hourly.wind_speed_10m[i],
       wind_direction_degrees: hourly.wind_direction_10m[i],
+      wind_gusts_kmh: hourly.wind_gusts_10m[i] ?? hourly.wind_speed_10m[i],
       surface_pressure_hpa: hourly.surface_pressure[i],
       weather_code: hourly.weather_code[i],
       conditions: describeWeatherCode(hourly.weather_code[i]),

@@ -74,6 +74,23 @@ export default function WindChart({ entries, mode }: Props) {
         : e.wind_speed_kmh;
     return kmhToKnots(kmh);
   });
+
+  const minSpeedKnots = entries.map((e) => {
+    const kmh =
+      mode === "daily" && "wind_speed_kmh" in e
+        ? (e as DailyAggregate).wind_speed_kmh
+        : e.wind_speed_kmh;
+    return kmhToKnots(kmh);
+  });
+
+  const maxGustsKnots = entries.map((e) => {
+    const kmhToUse =
+      mode === "daily" && "wind_gusts_max" in e
+        ? (e as DailyAggregate).wind_gusts_max
+        : ("wind_gusts_kmh" in e ? e.wind_gusts_kmh : e.wind_speed_kmh);
+    return kmhToKnots(kmhToUse);
+  });
+
   const directions = entries.map((e) => e.wind_direction_degrees);
   const barColors = speedsKnots.map((s) => windSpeedColor(s));
 
@@ -133,8 +150,8 @@ export default function WindChart({ entries, mode }: Props) {
 
   const bands = getWindBands();
 
-  const minSpeed = speedsKnots.length > 0 ? Math.min(...speedsKnots) : 0;
-  const maxSpeed = speedsKnots.length > 0 ? Math.max(...speedsKnots) : 0;
+  const minSpeed = minSpeedKnots.length > 0 ? Math.min(...minSpeedKnots) : 0;
+  const maxSpeed = maxGustsKnots.length > 0 ? Math.max(...maxGustsKnots) : 0;
 
   return (
     <div className={styles.chartSection}>
