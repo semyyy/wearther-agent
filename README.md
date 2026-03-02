@@ -57,8 +57,18 @@ Press `Ctrl+C` in each terminal to stop the respective process.
 
 ## Example queries
 
-| Query | Widget |
-|---|---|
-| What's the weather in Paris today? | Weather card with hourly chart |
-| How was the weather in Tokyo on 2025-12-25? | Historical weather card |
-| Total rainfall in Tunis in January 2026? | Monthly stats with bar chart |
+The assistant intelligently adapts its UI based on your request.
+
+| Query Type | Example | Result / UI Widget |
+|---|---|---|
+| **General** | "What's the weather in Paris today?" | Full **Weather Card** + Hourly Charts |
+| **Historical** | "How was the weather in Tokyo on 2024-12-25?" | **Historical Card** for that specific date |
+| **Monthly Stats** | "Total rainfall in Tunis in January 2026?" | **Monthly Stats Card** with BAR chart |
+| **Yearly Stats** | "Average temperature in New York in 2024?" | **Monthly Stats Card** for the whole year |
+| **Temperature Focus**| "Show me only the temperature in London" | **Focus Card**: Temperature + Large Scale Chart |
+| **Wind Focus** | "What is the wind in Marseille right now?" | **Focus Card**: Wind (Knots) + **Min/Max Gusts** |
+| **Pressure Focus** | "What's the atmospheric pressure in Berlin?" | **Focus Card**: Surface Pressure (hPa) Trend |
+| **Humidity Focus** | "How humid is it in Singapore?" | **Focus Card**: Humidity (%) Hourly Trend |
+
+### Pro-tip
+You can combine locations and dates naturally. If you don't specify a date, it assumes "today". For historical dates, use the `YYYY-MM-DD` format or relative terms like "yesterday" or "last month".
