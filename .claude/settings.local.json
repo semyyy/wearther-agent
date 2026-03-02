@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx adk:*)",
+      "WebSearch",
+      "WebFetch(domain:open-meteo.com)",
+      "Bash(echo:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

@@ -1,0 +1,80 @@
+import { FunctionTool, getLogger, ToolContext } from "@google/adk";
+import { z } from "zod";
+import { describeWeatherCode } from "../lib/weather-codes.js";
+
+const logger = getLogger();
+
+export const getHistoricalTool = new FunctionTool({
+  name: "get_historical_weather",
+  description:
+    "Fetches historical weather data for a past date at a specific location. Use this tool when the user asks about weather on a date that has already passed. Requires latitude, longitude, and the date.",
+  parameters: z.object({
+    latitude: z.number().describe("Latitude of the location"),
+    longitude: z.number().describe("Longitude of the location"),
+    date: z.string().describe("The past date in YYYY-MM-DD format"),
+    hour: z
+      .number()
+      .optional()
+      .describe("Optional hour (0-23) to filter results to a specific time"),
+  }),
+  execute: async ({ latitude, longitude, date, hour }, toolContext?: ToolContext) => {
+    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${date}&end_date=${date}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto`;
+
+    logger.info(`[get_historical_weather] Fetching historical data for (${latitude}, ${longitude}), date=${date}, hour=${hour ?? "all"}`);
+    logger.debug(`[get_historical_weather] Request URL: ${url}`);
+
+    const res = await fetch(url);
+    if (!res.ok) {
+      logger.error(`[get_historical_weather] API error: ${res.status} ${res.statusText}`);
+      return { error: `Historical weather API error: ${res.status} ${res.statusText}` };
+    }
+
+    const data = await res.json();
+    const hourly = data.hourly;
+
+    if (!hourly || !hourly.time) {
+      logger.warn(`[get_historical_weather] No historical data in API response for date=${date}`);
+      return { error: `No historical weather data available for ${date}.` };
+    }
+
+    logger.debug(`[get_historical_weather] Received ${hourly.time.length} hourly entries, timezone=${data.timezone}`);
+
+    let entries = hourly.time.map((time: string, i: number) => ({
+      time,
+      temperature_celsius: hourly.temperature_2m[i],
+      relative_humidity_percent: hourly.relative_humidity_2m[i],
+      wind_speed_kmh: hourly.wind_speed_10m[i],
+      wind_direction_degrees: hourly.wind_direction_10m[i],
+      weather_code: hourly.weather_code[i],
+      conditions: describeWeatherCode(hourly.weather_code[i]),
+    }));
+
+    if (hour !== undefined) {
+      const hourStr = hour.toString().padStart(2, "0");
+      const target = `${date}T${hourStr}:00`;
+      entries = entries.filter((e: { time: string }) => e.time === target);
+      logger.debug(`[get_historical_weather] Filtered to hour=${hourStr}: ${entries.length} entries`);
+    }
+
+    if (entries.length === 0) {
+      logger.warn(`[get_historical_weather] No data after filtering for date=${date}, hour=${hour}`);
+      return { error: `No historical data found for ${date}${hour !== undefined ? ` at ${hour}:00` : ""}.` };
+    }
+
+    logger.info(`[get_historical_weather] Returning ${entries.length} entries`);
+
+    // Store last historical query in session state
+    if (toolContext) {
+      toolContext.state.set("last_historical", JSON.stringify({
+        latitude, longitude, date, hour, timezone: data.timezone,
+        summary: entries[0],
+      }));
+      logger.debug(`[get_historical_weather] Stored last historical query in session state`);
+    }
+
+    return {
+      timezone: data.timezone,
+      data: entries,
+    };
+  },
+});
