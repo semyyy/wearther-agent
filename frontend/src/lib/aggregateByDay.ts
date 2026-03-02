@@ -8,6 +8,7 @@ export interface DailyAggregate {
   temperature_min: number;
   relative_humidity_percent: number;
   wind_speed_kmh: number;
+  wind_speed_min: number;
   wind_speed_max: number;
   wind_gusts_max: number;
   wind_direction_degrees: number;
@@ -75,6 +76,7 @@ export function aggregateByDay(entries: HourlyEntry[]): DailyAggregate[] {
       temperature_min: Math.min(...temps),
       relative_humidity_percent: Math.round(avg(humidities)),
       wind_speed_kmh: Math.round(avg(speeds) * 10) / 10,
+      wind_speed_min: Math.min(...speeds),
       wind_speed_max: Math.max(...speeds),
       wind_gusts_max: Math.max(...gusts),
       wind_direction_degrees: Math.round(meanDir),

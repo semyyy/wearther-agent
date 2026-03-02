@@ -57,6 +57,45 @@ const windArrowPlugin: Plugin<"bar"> = {
   },
 };
 
+/** Custom plugin: draws min/max labels on/above bars */
+const windDataLabelsPlugin: Plugin<"bar"> = {
+  id: "windDataLabels",
+  afterDatasetsDraw(chart) {
+    const meta = chart.getDatasetMeta(0);
+    if (!meta?.data?.length) return;
+
+    const ctx = chart.ctx;
+    const sustains: number[] = (chart.options as any)._sustains ?? [];
+    const gusts: number[] = (chart.options as any)._gusts ?? [];
+
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.font = "bold 9px sans-serif";
+
+    meta.data.forEach((bar, i) => {
+      const gust = gusts[i];
+      const sustain = sustains[i];
+      if (gust == null || sustain == null) return;
+
+      const x = bar.x;
+      const y = bar.y;
+
+      // Draw Gust (Max) value on top
+      ctx.fillStyle = "#fff";
+      ctx.fillText(`${gust}`, x, y - 18); // above the arrow
+
+      // Draw Sustain (Min/Avg) value inside the bar (if there's space) or just above
+      if (gust !== sustain) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.font = "9px sans-serif";
+        ctx.fillText(`${sustain}`, x, y + 12);
+      }
+    });
+    ctx.restore();
+  },
+};
+
 export default function WindChart({ entries, mode }: Props) {
   const labels = entries.map((e) => {
     if (mode === "hourly") {
@@ -77,8 +116,8 @@ export default function WindChart({ entries, mode }: Props) {
 
   const minSpeedKnots = entries.map((e) => {
     const kmh =
-      mode === "daily" && "wind_speed_kmh" in e
-        ? (e as DailyAggregate).wind_speed_kmh
+      mode === "daily" && "wind_speed_min" in e
+        ? (e as DailyAggregate).wind_speed_min
         : e.wind_speed_kmh;
     return kmhToKnots(kmh);
   });
@@ -144,8 +183,10 @@ export default function WindChart({ entries, mode }: Props) {
         },
       },
     },
-    // Stash directions so the plugin can read them
+    // Stash data for plugins
     _windDirections: directions,
+    _sustains: minSpeedKnots,
+    _gusts: maxGustsKnots,
   } as any;
 
   const bands = getWindBands();
@@ -163,7 +204,7 @@ export default function WindChart({ entries, mode }: Props) {
           Min: <span style={{ color: "#64B5F6" }}>{minSpeed}</span> | Max: <span style={{ color: "#EF5350" }}>{maxSpeed}</span>
         </div>
       </div>
-      <Bar data={data} options={options} plugins={[windArrowPlugin]} />
+      <Bar data={data} options={options} plugins={[windArrowPlugin, windDataLabelsPlugin]} />
       <div
         style={{
           display: "flex",
