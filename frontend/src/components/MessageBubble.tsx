@@ -1,5 +1,6 @@
 import type { ChatMessage } from "../api/types";
 import WeatherCard from "./WeatherCard";
+import WeatherFocusCard from "./WeatherFocusCard";
 import MonthlyStatsCard from "./MonthlyStatsCard";
 import styles from "../styles/chat.module.css";
 
@@ -12,15 +13,13 @@ export default function MessageBubble({ message }: Props) {
 
   return (
     <div
-      className={`${styles.messageRow} ${
-        isUser ? styles.messageRowUser : styles.messageRowAssistant
-      }`}
+      className={`${styles.messageRow} ${isUser ? styles.messageRowUser : styles.messageRowAssistant
+        }`}
     >
       <div>
         <div
-          className={`${styles.bubble} ${
-            isUser ? styles.bubbleUser : styles.bubbleAssistant
-          }`}
+          className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant
+            }`}
         >
           {message.text || (message.isStreaming ? "..." : "")}
         </div>
@@ -28,7 +27,11 @@ export default function MessageBubble({ message }: Props) {
         {message.toolData && (
           <div className={styles.widgetWrapper}>
             {message.toolData.type === "daily" && (
-              <WeatherCard data={message.toolData.data} />
+              message.toolData.data.focus && message.toolData.data.focus !== "all" ? (
+                <WeatherFocusCard data={message.toolData.data} />
+              ) : (
+                <WeatherCard data={message.toolData.data} />
+              )
             )}
             {message.toolData.type === "monthly" && (
               <MonthlyStatsCard data={message.toolData.data} />

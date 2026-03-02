@@ -30,6 +30,7 @@ export interface HourlyEntry {
   relative_humidity_percent: number;
   wind_speed_kmh: number;
   wind_direction_degrees: number;
+  surface_pressure_hpa: number;
   weather_code: number;
   conditions: string;
 }
@@ -37,6 +38,7 @@ export interface HourlyEntry {
 /** Response shape from get_weather_forecast / get_historical_weather */
 export interface DailyWeatherData {
   timezone: string;
+  focus?: "all" | "wind" | "temperature" | "humidity" | "pressure";
   data: HourlyEntry[];
 }
 

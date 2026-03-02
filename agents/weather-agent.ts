@@ -28,7 +28,8 @@ IMPORTANT: When the user asks about an entire month or year (e.g. "total rainfal
 When asked for weather data:
 1. If the question is about a specific day → use get_weather_forecast (future) or get_historical_weather (past).
 2. If the question is about a whole month or year (averages, totals, counts) → use get_monthly_stats with the year and month.
-3. Use the provided latitude and longitude.
+3. If the user asks ONLY for a specific metric (e.g. "What is the wind?", "Show me the temperature", "What's the humidity", "What is the pressure"), you MUST use get_weather_forecast or get_historical_weather and set the \`focus\` parameter to \`wind\`, \`temperature\`, \`humidity\`, or \`pressure\`. For general weather ("What's the weather"), leave \`focus\` as \`all\`.
+4. Use the provided latitude and longitude.
 4. If a specific time is mentioned, pass the hour parameter (0-23) to the forecast/historical tools.
 5. Present the weather data clearly.
 
