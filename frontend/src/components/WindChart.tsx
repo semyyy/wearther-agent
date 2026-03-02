@@ -37,7 +37,7 @@ const windArrowPlugin: Plugin<"bar"> = {
       if (dir == null) return;
 
       const x = bar.x;
-      const y = bar.y - 14; // above the bar
+      const y = bar.y - 14; // bar.y is the top of the floating bar (max)
       // Arrow points where wind blows TO (meteorological direction + 180)
       const angle = ((dir + 180) * Math.PI) / 180;
       const size = 6;
@@ -79,17 +79,21 @@ const windDataLabelsPlugin: Plugin<"bar"> = {
       if (gust == null || sustain == null) return;
 
       const x = bar.x;
-      const y = bar.y;
+      const yTop = bar.y; // Max (Gust)
+      const yBottom = (bar as any).base; // Min (Sustain)
 
       // Draw Gust (Max) value on top
       ctx.fillStyle = "#fff";
-      ctx.fillText(`${gust}`, x, y - 18); // above the arrow
+      ctx.fillText(`${gust}`, x, yTop - 18); // above the arrow
 
-      // Draw Sustain (Min/Avg) value inside the bar (if there's space) or just above
+      // Draw Sustain (Min/Avg) value at the base of the bar
       if (gust !== sustain) {
         ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
         ctx.font = "9px sans-serif";
-        ctx.fillText(`${sustain}`, x, y + 12);
+        // If the bar is tall enough, draw inside at the bottom, otherwise below
+        const height = yBottom - yTop;
+        const labelY = height > 15 ? yBottom - 4 : yBottom + 12;
+        ctx.fillText(`${sustain}`, x, labelY);
       }
     });
     ctx.restore();
@@ -106,12 +110,6 @@ export default function WindChart({ entries, mode }: Props) {
     return d.toLocaleDateString(undefined, { weekday: "short" });
   });
 
-  const speedsKnots = entries.map((e) => {
-    return mode === "daily" && "wind_speed_max" in e
-      ? (e as DailyAggregate).wind_speed_max
-      : (e as any).wind_speed_knots;
-  });
-
   const minSpeedKnots = entries.map((e) => {
     return mode === "daily" && "wind_speed_min" in e
       ? (e as DailyAggregate).wind_speed_min
@@ -125,16 +123,18 @@ export default function WindChart({ entries, mode }: Props) {
   });
 
   const directions = entries.map((e) => e.wind_direction_degrees);
-  const barColors = speedsKnots.map((s) => windSpeedColor(s));
+  const barColors = maxGustsKnots.map((g) => windSpeedColor(g));
 
   const data: ChartData<"bar"> = {
     labels,
     datasets: [
       {
-        label: mode === "daily" ? "Max Wind (kt)" : "Wind Speed (kt)",
-        data: speedsKnots,
+        label: "Wind Range (kt)",
+        // Floating bars: [min, max]
+        data: entries.map((_, i) => [minSpeedKnots[i], maxGustsKnots[i]] as any),
         backgroundColor: barColors,
         borderRadius: 3,
+        borderSkipped: false, // Ensure both ends are rounded if desired (or at least drawn)
       },
     ],
   };
@@ -149,10 +149,11 @@ export default function WindChart({ entries, mode }: Props) {
         callbacks: {
           label(ctx: any) {
             const i = ctx.dataIndex;
-            const speed = speedsKnots[i];
+            const min = minSpeedKnots[i];
+            const max = maxGustsKnots[i];
             const dir = directions[i];
             const cardinal = degreesToCardinal(dir);
-            return `${speed} kt ${cardinal} (${dir}°)`;
+            return `${min}-${max} kt ${cardinal} (${dir}°)`;
           },
         },
       },
