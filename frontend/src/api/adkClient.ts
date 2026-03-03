@@ -1,5 +1,5 @@
-import type { SSEEvent } from "./types";
-import { createLogger } from "../lib/logger";
+import type { SSEEvent } from "./types.js";
+import { createLogger } from "../lib/logger.js";
 
 const log = createLogger("sse");
 const BASE = "/api";

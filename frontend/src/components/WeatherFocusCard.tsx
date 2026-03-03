@@ -1,9 +1,6 @@
 import { useMemo } from "react";
 import type { DailyWeatherData } from "../api/types";
 import { aggregateByDay } from "../lib/aggregateByDay";
-import WeatherTemperatureChart from "./WeatherTemperatureChart";
-import WeatherHumidityChart from "./WeatherHumidityChart";
-import WeatherPressureChart from "./WeatherPressureChart";
 import WindChart from "./WindChart";
 import styles from "../styles/weather-card.module.css";
 
@@ -38,7 +35,6 @@ export default function WeatherFocusCard({ data }: Props) {
         case "temperature":
             title = "Temperature";
             value = `${Math.round(hero.temperature_celsius)}°C`;
-            ChartComponent = <WeatherTemperatureChart entries={chartEntries} mode={mode} />;
             break;
         case "wind":
             title = "Wind Speed";
@@ -48,12 +44,10 @@ export default function WeatherFocusCard({ data }: Props) {
         case "humidity":
             title = "Humidity";
             value = `${hero.relative_humidity_percent}%`;
-            ChartComponent = <WeatherHumidityChart entries={chartEntries} mode={mode} />;
             break;
         case "pressure":
             title = "Surface Pressure";
             value = `${Math.round(hero.surface_pressure_hpa)} hPa`;
-            ChartComponent = <WeatherPressureChart entries={chartEntries} mode={mode} />;
             break;
     }
 

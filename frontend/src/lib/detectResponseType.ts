@@ -2,7 +2,7 @@ import type {
   DailyWeatherData,
   MonthlyStatsData,
   ToolResponseData,
-} from "../api/types";
+} from "../api/types.js";
 
 const DAILY_TOOLS = ["get_weather_forecast", "get_historical_weather"];
 const MONTHLY_TOOLS = ["get_monthly_stats"];

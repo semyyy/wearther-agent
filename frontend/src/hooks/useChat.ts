@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
-import { createSession, sendMessageSSE } from "../api/adkClient";
-import type { ChatMessage, ToolResponseData } from "../api/types";
-import { detectResponseType } from "../lib/detectResponseType";
-import { createLogger } from "../lib/logger";
+import { createSession, sendMessageSSE } from "../api/adkClient.js";
+import type { ChatMessage, ToolResponseData } from "../api/types.js";
+import { detectResponseType } from "../lib/detectResponseType.js";
+import { createLogger } from "../lib/logger.js";
 
 const log = createLogger("chat");
 
@@ -125,11 +125,11 @@ export function useChat() {
       prev.map((m) =>
         m.id === assistantId
           ? {
-              ...m,
-              text: accumulatedText,
-              toolData,
-              isStreaming: false,
-            }
+            ...m,
+            text: accumulatedText,
+            toolData,
+            isStreaming: false,
+          }
           : m
       )
     );

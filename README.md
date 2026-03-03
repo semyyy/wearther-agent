@@ -1,19 +1,23 @@
 # Weather Assistant
 
-Multi-agent weather assistant built with Google ADK and a React frontend.
+Multi-agent weather assistant built with Google ADK and a React frontend. The project is organized into a clean **frontend** and **backend** structure.
 
 ## Configuration
 
-Before starting, you need to set up your environment variables. 
+Before starting, you need to set up your environment variables in the `backend` directory.
 
-1. Copy the example file:
-   ```bash
-   cp .env.example .env
-   ```
-2. Open `.env` and add your **Google AI API key**:
-   ```env
-   GOOGLE_API_KEY=your_actual_key_here
-   ```
+1.  Navigate to the backend:
+    ```bash
+    cd backend
+    ```
+2.  Copy the example file:
+    ```bash
+    cp .env.example .env
+    ```
+3.  Open `.env` and add your **Google AI API key**:
+    ```env
+    GOOGLE_API_KEY=your_actual_key_here
+    ```
 
 You can also configure the `MODEL` (e.g., `gemini-2.0-flash`) and `LOG_LEVEL` if needed.
 
@@ -21,19 +25,20 @@ You can also configure the `MODEL` (e.g., `gemini-2.0-flash`) and `LOG_LEVEL` if
 
 ```bash
 # Backend dependencies
-npm install
+cd backend && npm install
 
 # Frontend dependencies
-cd frontend && npm install
+cd ../frontend && npm install
 ```
 
 ## Start
 
-You need two terminals — one for the backend API and one for the frontend dev server.
+You need two terminals — one for the backend agent and one for the frontend dev server.
 
 **Terminal 1 — Backend (port 8000):**
 
 ```bash
+cd backend
 npx adk web -h localhost -p 8000
 ```
 
@@ -51,9 +56,15 @@ Open http://localhost:5173 in your browser.
 You can also test the backend multi-agent logic separately (without the main frontend) using the built-in development UI:
 - **URL**: http://localhost:8000/dev-ui
 
-## Stop
+## Project Structure
 
-Press `Ctrl+C` in each terminal to stop the respective process.
+- **`backend/`**: Contains the Google ADK agent logic.
+  - **`agents/`**: Definition of the coordinator and sub-agents (location, weather).
+  - **`tools/`**: ADK tools that the agents use.
+  - **`lib/`**: Shared libraries, including `weather-api.ts` which encapsulates all external API calls to Open-Meteo.
+- **`frontend/`**: The React-based user interface.
+  - **`src/components/`**: UI widgets for different weather data types.
+  - **`src/api/`**: Client-side SSE logic to communicate with the backend.
 
 ## Example queries
 
@@ -65,7 +76,7 @@ The assistant intelligently adapts its UI based on your request.
 | **Historical** | "How was the weather in Tokyo on 2024-12-25?" | **Historical Card** for that specific date |
 | **Monthly Stats** | "Total rainfall in Tunis in January 2026?" | **Monthly Stats Card** with BAR chart |
 | **Yearly Stats** | "Average temperature in New York in 2024?" | **Monthly Stats Card** for the whole year |
-| **Temperature Focus**| "Show me only the temperature in London" | **Focus Card**: Temperature + Large Scale Chart |
+| **Temperature Focus**| "Show me only the temperature in London" | **Focus Card**: Temperature Trend |
 | **Wind Focus** | "What is the wind in Marseille right now?" | **Focus Card**: Wind (Knots) + **Min/Max Gusts** |
 | **Pressure Focus** | "What's the atmospheric pressure in Berlin?" | **Focus Card**: Surface Pressure (hPa) Trend |
 | **Humidity Focus** | "How humid is it in Singapore?" | **Focus Card**: Humidity (%) Hourly Trend |

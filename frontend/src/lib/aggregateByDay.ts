@@ -1,4 +1,4 @@
-import type { HourlyEntry } from "../api/types";
+import type { HourlyEntry } from "../api/types.js";
 
 export interface DailyAggregate {
   date: string;
