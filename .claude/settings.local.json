@@ -8,7 +8,12 @@
       "Bash(echo:*)",
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pkill:*)",
+      "Bash(sleep 8:*)",
+      "Bash(npx tsx:*)",
+      "Bash(ls:*)"
     ]
   }
 }

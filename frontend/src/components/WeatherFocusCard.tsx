@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import type { DailyWeatherData } from "../api/types";
 import { aggregateByDay } from "../lib/aggregateByDay";
 import WindChart from "./WindChart";
+import WeatherAvatar from "./WeatherAvatar";
+import { determineAvatarScenario, WeatherParams } from "../lib/avatarLogic";
 import styles from "../styles/weather-card.module.css";
 
 interface Props {
@@ -23,7 +25,6 @@ export default function WeatherFocusCard({ data }: Props) {
 
     if (!entries.length || !focus || focus === "all") return null;
 
-    // Use the midday entry (or first available) as the "hero" value
     const hero =
         entries.find((e) => new Date(e.time).getHours() === 12) ?? entries[0];
 
@@ -51,9 +52,19 @@ export default function WeatherFocusCard({ data }: Props) {
             break;
     }
 
+    const heroWeatherParams: WeatherParams = {
+        temp_c: hero.temperature_celsius,
+        condition_code: hero.weather_code,
+        precip_probability: hero.precipitation_probability ?? 0,
+        wind_kph: hero.wind_speed_knots * 1.852,
+        uv_index: hero.uv_index ?? 0,
+        is_day: hero.is_day !== undefined ? hero.is_day : true,
+    };
+    const scenario = determineAvatarScenario(heroWeatherParams);
+
     return (
         <div className={styles.card}>
-            <div className={styles.hero} style={{ marginBottom: "16px" }}>
+            <div className={styles.hero} style={{ marginBottom: "16px", alignItems: "center", display: "flex", justifyContent: "space-between" }}>
                 <div className={styles.heroInfo}>
                     <div className={styles.conditions} style={{ marginTop: 0, marginBottom: "4px", color: "var(--color-text-muted)" }}>
                         {title} Focus
@@ -62,6 +73,8 @@ export default function WeatherFocusCard({ data }: Props) {
                         {value}
                     </div>
                 </div>
+
+                <WeatherAvatar scenario={scenario} />
             </div>
 
             <div className={styles.details} style={{ padding: "12px 16px" }}>

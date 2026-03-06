@@ -47,6 +47,9 @@ export const getHistoricalTool = new FunctionTool({
         wind_gusts_knots: hourly.wind_gusts_10m[i] ?? hourly.wind_speed_10m[i],
         surface_pressure_hpa: hourly.surface_pressure[i],
         precipitation_mm: hourly.precipitation[i],
+        precipitation_probability: hourly.precipitation_probability ? (hourly.precipitation_probability[i] ?? 0) : 0,
+        uv_index: hourly.uv_index[i] ?? 0,
+        is_day: hourly.is_day[i] === 1,
         weather_code: hourly.weather_code[i],
         conditions: describeWeatherCode(hourly.weather_code[i]),
       }));

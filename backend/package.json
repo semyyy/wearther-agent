@@ -10,6 +10,7 @@
   "dependencies": {
     "@google/adk": "^0.4.0",
     "dotenv": "^16.4.0",
+    "openai": "^6.25.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

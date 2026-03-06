@@ -25,7 +25,7 @@ export async function fetchForecast(
     longitude: number,
     timezone = "auto"
 ) {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,surface_pressure,wind_gusts_10m,precipitation&wind_speed_unit=kn&timezone=${timezone}`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,surface_pressure,wind_gusts_10m,precipitation,precipitation_probability,uv_index,is_day&wind_speed_unit=kn&timezone=${timezone}`;
 
     logger.info(
         `[weather-api] Fetching forecast for (${latitude}, ${longitude})`
@@ -49,7 +49,8 @@ export async function fetchHistorical(
     endDate: string,
     timezone = "auto"
 ) {
-    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${endDate}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,surface_pressure,wind_gusts_10m,precipitation&wind_speed_unit=kn&timezone=${timezone}`;
+    // Note: precipitation_probability might not be available fundamentally in the historical archive mode on all dates, but we try to request it if possible or it will be ignored depending on the Open-Meteo tier. uv_index and is_day is supported.
+    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${endDate}&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,surface_pressure,wind_gusts_10m,precipitation,uv_index,is_day&wind_speed_unit=kn&timezone=${timezone}`;
 
     logger.info(
         `[weather-api] Fetching historical data for (${latitude}, ${longitude}), range=${startDate} to ${endDate}`

@@ -33,12 +33,17 @@ export interface HourlyEntry {
   wind_direction_degrees: number;
   surface_pressure_hpa: number;
   precipitation_mm: number;
+  precipitation_probability: number;
+  uv_index: number;
+  is_day: boolean;
   weather_code: number;
   conditions: string;
 }
 
-/** Response shape from get_weather_forecast / get_historical_weather */
+/** Response shape from get_weather_forecast / get_historical_weather / get_city_weather */
 export interface DailyWeatherData {
+  latitude?: number;
+  longitude?: number;
   timezone: string;
   focus?: "all" | "wind" | "temperature" | "humidity" | "pressure";
   data: HourlyEntry[];

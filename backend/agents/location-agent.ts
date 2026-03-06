@@ -1,8 +1,9 @@
 import { LlmAgent, getLogger } from "@google/adk";
+import { getModel } from "../lib/llm-provider.js";
 import { geocodeTool } from "../tools/geocode.tool.js";
 
 const logger = getLogger();
-const model = process.env.MODEL || "gemini-3.0-flash";
+const model = getModel();
 
 logger.info(`[location_agent] Initializing with model=${model}`);
 

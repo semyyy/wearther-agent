@@ -82,6 +82,8 @@ export function useChat() {
               setThinkingStatus("Calculating statistics...");
             } else if (name === "transfer_to_agent") {
               setThinkingStatus("Thinking...");
+            } else if (name === "get_city_weather") {
+              setThinkingStatus("Fetching weather...");
             } else {
               setThinkingStatus("Processing...");
             }

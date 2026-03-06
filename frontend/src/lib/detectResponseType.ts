@@ -4,7 +4,7 @@ import type {
   ToolResponseData,
 } from "../api/types.js";
 
-const DAILY_TOOLS = ["get_weather_forecast", "get_historical_weather"];
+const DAILY_TOOLS = ["get_weather_forecast", "get_historical_weather", "get_city_weather"];
 const MONTHLY_TOOLS = ["get_monthly_stats"];
 
 /**

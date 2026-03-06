@@ -1,10 +1,11 @@
 import { LlmAgent, getLogger } from "@google/adk";
+import { getModel } from "../lib/llm-provider.js";
 import { getForecastTool } from "../tools/get-forecast.tool.js";
 import { getHistoricalTool } from "../tools/get-historical.tool.js";
 import { getMonthlyStatsTool } from "../tools/get-monthly-stats.tool.js";
 
 const logger = getLogger();
-const model = process.env.MODEL || "gemini-3.0-flash";
+const model = getModel();
 const today = new Date().toISOString().split("T")[0];
 
 logger.info(`[weather_agent] Initializing with model=${model}, today=${today}`);

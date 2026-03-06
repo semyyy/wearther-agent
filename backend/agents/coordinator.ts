@@ -1,13 +1,16 @@
 import { LlmAgent, getLogger } from "@google/adk";
+import { getModel } from "../lib/llm-provider.js";
 import { locationAgent } from "./location-agent.js";
 import { weatherAgent } from "./weather-agent.js";
 
 const logger = getLogger();
-const model = process.env.MODEL || "gemini-3.0-flash";
+const model = getModel();
 const today = new Date().toISOString().split("T")[0];
 
 logger.info(`[coordinator] Initializing with model=${model}, today=${today}`);
-logger.debug(`[coordinator] Sub-agents: location_agent, weather_agent`);
+
+// ─── Multi-agent coordinator ───────────────────────────────────────────────
+// Uses sub-agents with automatic transfer_to_agent orchestration.
 
 export const coordinator = new LlmAgent({
   name: "coordinator",
@@ -38,6 +41,6 @@ If the user asks about a past date, the weather_agent will use historical data.
 If the user asks about the current or future date, the weather_agent will use forecast data.
 If the user asks about an entire month or year (e.g. "total rainfall in January", "average temperature in 2024", "rainy days last month"), the weather_agent will use monthly climate statistics.
 
-Always be helpful and conversational in your final response to the user.`,
+CRITICAL: YOU MUST RESPOND WITH EXACTLY ONE SINGLE SENTENCE. NO EXCEPTIONS. Do NOT generate markdown, bullet points, or paragraphs. Only write ONE brief conversational sentence summarizing the weather. The UI will automatically display the avatar and charts based on your tools, so you don't need to overexplain.`,
   subAgents: [locationAgent, weatherAgent],
 });

@@ -58,6 +58,7 @@ You can also test the backend multi-agent logic separately (without the main fro
 
 ## Project Structure
 
+- **`specs/`**: Detailed project **[specifications](./specs/overview.md)** covering architecture, agents, API integration, and UI.
 - **`backend/`**: Contains the Google ADK agent logic.
   - **`agents/`**: Definition of the coordinator and sub-agents (location, weather).
   - **`tools/`**: ADK tools that the agents use.
