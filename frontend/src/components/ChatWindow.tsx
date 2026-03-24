@@ -1,24 +1,30 @@
-import { useChat } from "../hooks/useChat";
+import type { ChatMessage } from "../api/types";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import Spinner from "./Spinner";
+import layoutStyles from "../styles/layout.module.css";
 import styles from "../styles/chat.module.css";
 
-export default function ChatWindow() {
-  const { messages, isLoading, thinkingStatus, sendMessage } = useChat();
+interface Props {
+  messages: ChatMessage[];
+  isLoading: boolean;
+  thinkingStatus: string;
+  onSend: (text: string) => void;
+}
 
+export default function ChatWindow({ messages, isLoading, thinkingStatus, onSend }: Props) {
   return (
-    <div className={styles.chatContainer}>
-      <div className={styles.header}>
-        <span className={styles.headerIcon}>&#9925;</span>
-        <span className={styles.headerTitle}>Weather Assistant</span>
+    <div className={layoutStyles.chatPanel}>
+      <div className={styles.panelHeader}>
+        <span className={styles.panelIcon}>&#128488;</span>
+        <span className={styles.panelTitle}>Chat</span>
       </div>
 
       <MessageList messages={messages} />
 
       {isLoading && <Spinner status={thinkingStatus} />}
 
-      <ChatInput onSend={sendMessage} disabled={isLoading} />
+      <ChatInput onSend={onSend} disabled={isLoading} />
     </div>
   );
 }

@@ -6,8 +6,6 @@ import WeatherIcon from "./WeatherIcon";
 import WeatherHourlyChart from "./WeatherHourlyChart";
 import WindChart from "./WindChart";
 import WeeklyTemperatureChart from "./WeeklyTemperatureChart";
-import WeatherAvatar from "./WeatherAvatar";
-import { determineAvatarScenario, WeatherParams } from "../lib/avatarLogic";
 import styles from "../styles/weather-card.module.css";
 
 interface Props {
@@ -35,33 +33,19 @@ export default function WeatherCard({ data }: Props) {
     entries.find((e) => new Date(e.time).getHours() === 12) ?? entries[0];
   const iconGroup = getIconGroup(hero.weather_code);
 
-  const heroWeatherParams: WeatherParams = {
-    temp_c: hero.temperature_celsius,
-    condition_code: hero.weather_code,
-    precip_probability: hero.precipitation_probability ?? 0,
-    wind_kph: hero.wind_speed_knots * 1.852,
-    uv_index: hero.uv_index ?? 0,
-    is_day: hero.is_day !== undefined ? hero.is_day : true,
-  };
-  const scenario = determineAvatarScenario(heroWeatherParams);
-
   if (isWeekly) {
     return (
       <div className={styles.card}>
-        <div className={styles.hero} style={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div className={styles.iconWrap}>
-              <WeatherIcon group={iconGroup} />
-            </div>
-            <div className={styles.heroInfo}>
-              <div className={styles.temperature}>{uniqueDates}-Day Forecast</div>
-              <div className={styles.conditions}>
-                {describeWeatherCode(hero.weather_code)}
-              </div>
+        <div className={styles.hero}>
+          <div className={styles.iconWrap}>
+            <WeatherIcon group={iconGroup} />
+          </div>
+          <div className={styles.heroInfo}>
+            <div className={styles.temperature}>{uniqueDates}-Day Forecast</div>
+            <div className={styles.conditions}>
+              {describeWeatherCode(hero.weather_code)}
             </div>
           </div>
-
-          <WeatherAvatar scenario={scenario} />
         </div>
 
         <WeeklyTemperatureChart dailyAggregates={dailyAggregates} />
@@ -72,22 +56,18 @@ export default function WeatherCard({ data }: Props) {
 
   return (
     <div className={styles.card}>
-      <div className={styles.hero} style={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <div className={styles.iconWrap}>
-            <WeatherIcon group={iconGroup} />
+      <div className={styles.hero}>
+        <div className={styles.iconWrap}>
+          <WeatherIcon group={iconGroup} />
+        </div>
+        <div className={styles.heroInfo}>
+          <div className={styles.temperature}>
+            {Math.round(hero.temperature_celsius)}°C
           </div>
-          <div className={styles.heroInfo}>
-            <div className={styles.temperature}>
-              {Math.round(hero.temperature_celsius)}°C
-            </div>
-            <div className={styles.conditions}>
-              {describeWeatherCode(hero.weather_code)}
-            </div>
+          <div className={styles.conditions}>
+            {describeWeatherCode(hero.weather_code)}
           </div>
         </div>
-
-        <WeatherAvatar scenario={scenario} />
       </div>
 
       <div className={styles.details}>

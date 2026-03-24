@@ -1,0 +1,271 @@
+/* ===== 3-Zone Layout (Chat 25% | Response+Avatar 25% | Diagrams 50%) ===== */
+.appLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+  height: 100vh;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.appHeader {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--color-surface);
+  backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.appHeaderIcon {
+  font-size: 28px;
+  filter: drop-shadow(0 0 8px var(--color-primary));
+}
+
+.appHeaderTitle {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== Shared Panel Styles ===== */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.panelIcon {
+  font-size: 18px;
+  filter: drop-shadow(0 0 6px var(--color-primary));
+}
+
+.panelTitle {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.placeholder {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 32px 16px;
+  line-height: 1.6;
+}
+
+/* ===== Chat Panel (Zone 1 — 25%) ===== */
+.chatPanel {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ===== Response + Avatar Panel (Zone 2 — 25%) ===== */
+.responsePanel {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  min-height: 0;
+}
+
+.responseContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  overflow-y: auto;
+  gap: 20px;
+}
+
+/* Avatar section inside response panel */
+.avatarSection {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 0;
+}
+
+.avatarPlaceholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed var(--color-border);
+}
+
+.avatarPlaceholderIcon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.responseText {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text);
+  text-align: center;
+  animation: fadeIn 0.4s ease-in;
+}
+
+.thinkingStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.thinkingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.thinkingDot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinkingDot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.thinkingText {
+  margin-left: 4px;
+}
+
+/* ===== Diagrams Panel (Zone 3 — 50%) ===== */
+.diagramsPanel {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  min-height: 0;
+}
+
+.diagramsContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* ===== Responsive: Medium (768px–1279px) ===== */
+@media (max-width: 1279px) and (min-width: 768px) {
+  .appLayout {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr 1fr;
+  }
+
+  .appHeader {
+    grid-column: 1 / -1;
+  }
+
+  /* Chat + Response+Avatar on first row */
+  .chatPanel {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .responsePanel {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* Diagrams full width on second row */
+  .diagramsPanel {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
+/* ===== Responsive: Mobile (<768px) ===== */
+@media (max-width: 767px) {
+  .appLayout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    height: auto;
+    min-height: 100vh;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .appHeader {
+    padding: 12px 16px;
+  }
+
+  .chatPanel {
+    min-height: 300px;
+    max-height: 50vh;
+  }
+
+  .responsePanel {
+    max-height: 280px;
+  }
+
+  .diagramsPanel {
+    max-height: 60vh;
+  }
+}
