@@ -81,6 +81,38 @@
   border: 1px solid var(--color-border);
 }
 
+.bubbleWithAvatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 90%;
+  padding: 16px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(6, 182, 212, 0.06) 100%
+  );
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius);
+  border-bottom-left-radius: 4px;
+}
+
+.avatarInline {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.assistantText {
+  font-size: 15px;
+  line-height: 1.7;
+  text-align: center;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 .inputBar {
   display: flex;
   gap: 12px;

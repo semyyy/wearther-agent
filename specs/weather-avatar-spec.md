@@ -226,24 +226,29 @@ métier et UI - Facilement extensible
 
 ## 11. 🖥️ Layout de l'Interface
 
-L'interface principale est divisée en **3 zones distinctes** :
+L'interface principale est divisée en **2 zones distinctes** :
 
-- La zone **Diagrammes occupe 50% de la largeur** de l'écran (zone principale).
-- L'**avatar est intégré dans la zone Réponse** (pas de zone séparée).
+- La zone **Chat** (~25%) inclut l'avatar directement dans les réponses du chat.
+- La zone **Diagrammes occupe 75% de la largeur** de l'écran (zone principale).
+- ⚠️ **Le panel Réponse séparé est supprimé.** L'avatar et la réponse de l'agent sont intégrés directement dans le flux de conversation du chat.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                         HEADER / Navbar                          │
-├────────────┬───────────────────┬─────────────────────────────────┤
-│            │                   │                                 │
-│   CHAT     │ RÉPONSE + AVATAR  │         DIAGRAMMES              │
-│   (input)  │                   │        (50% écran)              │
-│            │  [Avatar]         │                                 │
-│  Zone de   │  Réponse courte   │  - Graphiques météo             │
-│  saisie    │  de l'agent       │  - WeatherCard                  │
-│  utilisat. │  (langue auto)    │  - Carte / Charts               │
-│            │                   │                                 │
-├────────────┴───────────────────┴─────────────────────────────────┤
+├────────────┬─────────────────────────────────────────────────────┤
+│            │                                                     │
+│   CHAT     │              DIAGRAMMES                             │
+│   (~25%)   │              (75% écran)                            │
+│            │                                                     │
+│  Messages  │  - Graphiques météo                                 │
+│  utilisat. │  - WeatherCard                                      │
+│            │  - Carte / Charts                                   │
+│  [Avatar]  │                                                     │
+│  Réponse   │                                                     │
+│  formatée  │                                                     │
+│  de l'agent│                                                     │
+│            │                                                     │
+├────────────┴─────────────────────────────────────────────────────┤
 │                        FOOTER (optionnel)                        │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -253,17 +258,20 @@ L'interface principale est divisée en **3 zones distinctes** :
 - Zone de conversation / saisie de l'utilisateur
 - Historique des messages envoyés
 - Input texte en bas de la zone
+- **L'avatar est affiché directement dans chaque réponse de l'agent** (au-dessus du texte de réponse), avec les vêtements adaptés à la météo (cf. §5)
+- L'avatar se met à jour à chaque nouvelle réponse météo
 
-### 11.2 Zone Réponse + Avatar (centre, ~25%)
+### 11.2 Format des réponses dans le Chat
 
-- Affiche l'**avatar dynamique** en haut de la zone, avec les vêtements adaptés à la météo (cf. §5)
-- L'avatar reste **toujours visible** et se met à jour à chaque nouvelle réponse
-- En dessous de l'avatar : la **réponse textuelle courte** de l'agent (cf. règle §12)
-- Peut afficher des informations complémentaires (résumé météo, alertes)
+Les réponses de l'agent dans le chat doivent être **bien formatées et agréables à lire** :
+- L'**avatar** apparaît en tête de la réponse (inline dans le message)
+- Le texte de réponse est **structuré et visuellement clair** : utilisation de mise en forme (gras, icônes météo, couleurs) pour rendre la lecture agréable
+- Ton **sympathique et engageant**, cohérent avec le style cartoon de l'avatar
+- Informations complémentaires (résumé météo, alertes) affichées de manière concise et lisible
 
-### 11.3 Zone Diagrammes (droite, **50% de l'écran**)
+### 11.3 Zone Diagrammes (droite, **75% de l'écran**)
 
-- **Occupe la moitié de la largeur** de l'écran pour maximiser la lisibilité des graphiques
+- **Occupe 75% de la largeur** de l'écran pour maximiser la lisibilité des graphiques
 - Affiche les graphiques météo (température, humidité, vent, précipitations)
 - Affiche les cartes météo (WeatherCard, WeatherFocusCard)
 - Zone scrollable indépendamment pour parcourir les différents graphiques
@@ -271,16 +279,16 @@ L'interface principale est divisée en **3 zones distinctes** :
 
 ### 11.4 Comportement responsive
 
-- Sur écran large (>= 1280px) : 3 zones côte à côte (25% | 25% | 50%)
-- Sur écran moyen (768px-1279px) : 2 lignes — (Chat | Réponse+Avatar) en haut, Diagrammes pleine largeur en bas
-- Sur mobile (< 768px) : Empilement vertical (Chat -> Réponse+Avatar -> Diagrammes)
+- Sur écran large (>= 1280px) : 2 zones côte à côte (25% | 75%)
+- Sur écran moyen (768px-1279px) : 2 lignes — Chat en haut, Diagrammes pleine largeur en bas
+- Sur mobile (< 768px) : Empilement vertical (Chat -> Diagrammes)
 
 ------------------------------------------------------------------------
 
 ## 12. 🗣️ Règle de Réponse de l'Agent (LLM)
 
 Lorsqu'une question sur la météo est posée, le système (via le Coordinator Agent) doit :
-1.  Répondre par **une seule phrase courte et concise** (affichée dans la zone Réponse+Avatar, cf. §11.2).
+1.  Répondre avec un **message bien formaté et agréable** directement dans le chat (cf. §11.2) : texte structuré, icônes, mise en forme claire.
 2.  **Répondre dans la langue de la demande** : si l'utilisateur pose sa question en français, la réponse est en français ; en anglais, la réponse est en anglais ; etc.
-3.  Afficher l'avatar avec les vêtements adaptés à la situation décrite (intégré dans la zone Réponse, cf. §11.2).
-4.  Afficher les graphiques / la carte météo (WeatherCard ou WeatherFocusCard) associés à la demande (zone Diagrammes 50%, cf. §11.3).
+3.  Afficher l'avatar avec les vêtements adaptés à la situation décrite, **intégré dans le message du chat** (cf. §11.1).
+4.  Afficher les graphiques / la carte météo (WeatherCard ou WeatherFocusCard) associés à la demande (zone Diagrammes 75%, cf. §11.3).

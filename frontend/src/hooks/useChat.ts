@@ -15,7 +15,6 @@ export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [thinkingStatus, setThinkingStatus] = useState("");
-  const [latestResponse, setLatestResponse] = useState("");
   const [latestToolData, setLatestToolData] = useState<ToolResponseData | undefined>();
 
   const userIdRef = useRef(`user-${Date.now()}`);
@@ -138,8 +137,6 @@ export function useChat() {
       )
     );
 
-    // Expose latest response and tool data for the layout panels
-    setLatestResponse(accumulatedText);
     if (toolData) {
       setLatestToolData(toolData);
     }
@@ -149,5 +146,5 @@ export function useChat() {
     setThinkingStatus("");
   }, []);
 
-  return { messages, isLoading, thinkingStatus, sendMessage, latestResponse, latestToolData };
+  return { messages, isLoading, thinkingStatus, sendMessage, latestToolData };
 }
