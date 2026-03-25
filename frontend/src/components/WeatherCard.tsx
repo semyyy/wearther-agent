@@ -5,6 +5,13 @@ import { aggregateByDay } from "../lib/aggregateByDay";
 import WeatherIcon from "./WeatherIcon";
 import WeatherHourlyChart from "./WeatherHourlyChart";
 import WindChart from "./WindChart";
+import PrecipitationChart from "./PrecipitationChart";
+import UVIndexChart from "./UVIndexChart";
+import AirQualityChart from "./AirQualityChart";
+import CloudCoverChart from "./CloudCoverChart";
+import VisibilityChart from "./VisibilityChart";
+import DewPointChart from "./DewPointChart";
+import EphemerisCard from "./EphemerisCard";
 import WeeklyTemperatureChart from "./WeeklyTemperatureChart";
 import styles from "../styles/weather-card.module.css";
 
@@ -66,6 +73,12 @@ export default function WeatherCard({ data }: Props) {
           </div>
           <div className={styles.conditions}>
             {describeWeatherCode(hero.weather_code)}
+            {hero.feels_like_celsius != null &&
+              Math.round(hero.feels_like_celsius) !== Math.round(hero.temperature_celsius) && (
+                <span style={{ fontSize: 13, marginLeft: 8, opacity: 0.7 }}>
+                  (Feels {Math.round(hero.feels_like_celsius)}°C)
+                </span>
+              )}
           </div>
         </div>
       </div>
@@ -80,6 +93,28 @@ export default function WeatherCard({ data }: Props) {
           <span>{hero.wind_speed_knots} kt</span>
         </div>
         <div className={styles.detailItem}>
+          <span className={styles.detailLabel}>UV</span>
+          <span>{hero.uv_index}</span>
+        </div>
+        {hero.visibility_km != null && (
+          <div className={styles.detailItem}>
+            <span className={styles.detailLabel}>Visibility</span>
+            <span>{hero.visibility_km.toFixed(1)} km</span>
+          </div>
+        )}
+        {hero.cloud_cover_percent != null && (
+          <div className={styles.detailItem}>
+            <span className={styles.detailLabel}>Clouds</span>
+            <span>{hero.cloud_cover_percent}%</span>
+          </div>
+        )}
+        {hero.air_quality && hero.air_quality.aqi > 0 && (
+          <div className={styles.detailItem}>
+            <span className={styles.detailLabel}>AQI</span>
+            <span>{hero.air_quality.aqi}</span>
+          </div>
+        )}
+        <div className={styles.detailItem}>
           <span className={styles.detailLabel}>Time</span>
           <span>
             {new Date(hero.time).toLocaleTimeString([], {
@@ -91,10 +126,17 @@ export default function WeatherCard({ data }: Props) {
       </div>
 
       {entries.length > 1 && (
-        <>
+        <div className={styles.chartsGrid}>
           <WeatherHourlyChart entries={entries} />
+          <PrecipitationChart entries={entries} />
           <WindChart entries={entries} mode="hourly" />
-        </>
+          <UVIndexChart entries={entries} />
+          <AirQualityChart entries={entries} />
+          <CloudCoverChart entries={entries} />
+          <VisibilityChart entries={entries} />
+          <DewPointChart entries={entries} />
+          <EphemerisCard entries={entries} />
+        </div>
       )}
     </div>
   );

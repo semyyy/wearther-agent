@@ -19,11 +19,16 @@ export default function MessageBubble({ message }: Props) {
       entries.find((e) => new Date(e.time).getHours() === 12) ?? entries[0];
     const params: WeatherParams = {
       temp_c: hero.temperature_celsius,
+      feels_like_c: hero.feels_like_celsius ?? hero.temperature_celsius,
       condition_code: hero.weather_code,
       precip_probability: hero.precipitation_probability ?? 0,
       wind_kph: hero.wind_speed_knots * 1.852,
       uv_index: hero.uv_index ?? 0,
       is_day: hero.is_day !== undefined ? hero.is_day : true,
+      cloud_cover_pct: hero.cloud_cover_percent ?? null,
+      visibility_km: hero.visibility_km ?? null,
+      dew_point_c: hero.dew_point_celsius ?? null,
+      aqi_index: hero.air_quality?.aqi ?? 0,
     };
     return determineAvatarScenario(params);
   }, [isUser, message.toolData]);

@@ -23,11 +23,24 @@ export interface SSEEvent {
   };
 }
 
+/** Air quality data */
+export interface AirQualityEntry {
+  pm2_5: number;
+  pm10: number;
+  no2: number;
+  ozone: number;
+  aqi: number;
+}
+
 /** Hourly weather entry from get_weather_forecast / get_historical_weather */
 export interface HourlyEntry {
   time: string;
   temperature_celsius: number;
+  feels_like_celsius: number;
   relative_humidity_percent: number;
+  dew_point_celsius: number | null;
+  cloud_cover_percent: number | null;
+  visibility_km: number | null;
   wind_speed_knots: number;
   wind_gusts_knots: number;
   wind_direction_degrees: number;
@@ -38,6 +51,9 @@ export interface HourlyEntry {
   is_day: boolean;
   weather_code: number;
   conditions: string;
+  air_quality: AirQualityEntry;
+  sunrise: string | null;
+  sunset: string | null;
 }
 
 /** Response shape from get_weather_forecast / get_historical_weather / get_city_weather */

@@ -8,6 +8,8 @@ const AVATAR_IMAGES: Record<AvatarScenario, string> = {
     cool_rainy_windy: "/assets/avatar/avatar_cool_rainy_windy.png",
     cold_snow: "/assets/avatar/avatar_cold_snow.png",
     cool_dry: "/assets/avatar/avatar_cool_dry.png",
+    foggy: "/assets/avatar/avatar_foggy.png",
+    pollution: "/assets/avatar/avatar_pollution.png",
 };
 
 const AVATAR_ALT: Record<AvatarScenario, string> = {
@@ -17,6 +19,8 @@ const AVATAR_ALT: Record<AvatarScenario, string> = {
     cool_rainy_windy: "Imperméable jaune et capuche",
     cold_snow: "Manteau d'hiver, bonnet et écharpe",
     cool_dry: "Pull vert et pantalon",
+    foggy: "Écharpe remontée dans le brouillard",
+    pollution: "Masque anti-pollution",
 };
 
 interface Props {
@@ -30,6 +34,13 @@ export default function WeatherAvatar({ scenario }: Props) {
                 src={AVATAR_IMAGES[scenario]}
                 alt={AVATAR_ALT[scenario]}
                 className={styles.avatarImage}
+                onError={(e) => {
+                    // Fallback to mild_cloudy if specific avatar image is missing
+                    const img = e.currentTarget;
+                    if (!img.src.endsWith("avatar_mild_cloudy.png")) {
+                        img.src = AVATAR_IMAGES.mild_cloudy;
+                    }
+                }}
             />
         </div>
     );

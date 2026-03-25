@@ -38,21 +38,45 @@ export const getHistoricalTool = new FunctionTool({
 
       logger.debug(`[get_historical_weather] Received ${hourly.time.length} hourly entries, timezone=${data.timezone}`);
 
-      let entries = hourly.time.map((time: string, i: number) => ({
-        time,
-        temperature_celsius: hourly.temperature_2m[i],
-        relative_humidity_percent: hourly.relative_humidity_2m[i],
-        wind_speed_knots: hourly.wind_speed_10m[i],
-        wind_direction_degrees: hourly.wind_direction_10m[i],
-        wind_gusts_knots: hourly.wind_gusts_10m[i] ?? hourly.wind_speed_10m[i],
-        surface_pressure_hpa: hourly.surface_pressure[i],
-        precipitation_mm: hourly.precipitation[i],
-        precipitation_probability: hourly.precipitation_probability ? (hourly.precipitation_probability[i] ?? 0) : 0,
-        uv_index: hourly.uv_index[i] ?? 0,
-        is_day: hourly.is_day[i] === 1,
-        weather_code: hourly.weather_code[i],
-        conditions: describeWeatherCode(hourly.weather_code[i]),
-      }));
+      const daily = data.daily;
+
+      // Build sunrise/sunset lookup by date
+      const sunTimes: Record<string, { sunrise: string; sunset: string }> = {};
+      if (daily?.time) {
+        for (let d = 0; d < daily.time.length; d++) {
+          sunTimes[daily.time[d]] = {
+            sunrise: daily.sunrise[d],
+            sunset: daily.sunset[d],
+          };
+        }
+      }
+
+      let entries = hourly.time.map((time: string, i: number) => {
+        const dateKey = time.slice(0, 10);
+        const sun = sunTimes[dateKey];
+        return {
+          time,
+          temperature_celsius: hourly.temperature_2m[i],
+          feels_like_celsius: hourly.apparent_temperature?.[i] ?? hourly.temperature_2m[i],
+          relative_humidity_percent: hourly.relative_humidity_2m[i],
+          dew_point_celsius: hourly.dew_point_2m?.[i] ?? null,
+          cloud_cover_percent: hourly.cloud_cover?.[i] ?? null,
+          visibility_km: hourly.visibility?.[i] != null ? hourly.visibility[i] / 1000 : null,
+          wind_speed_knots: hourly.wind_speed_10m[i],
+          wind_direction_degrees: hourly.wind_direction_10m[i],
+          wind_gusts_knots: hourly.wind_gusts_10m[i] ?? hourly.wind_speed_10m[i],
+          surface_pressure_hpa: hourly.surface_pressure[i],
+          precipitation_mm: hourly.precipitation[i],
+          precipitation_probability: hourly.precipitation_probability ? (hourly.precipitation_probability[i] ?? 0) : 0,
+          uv_index: hourly.uv_index[i] ?? 0,
+          is_day: hourly.is_day[i] === 1,
+          weather_code: hourly.weather_code[i],
+          conditions: describeWeatherCode(hourly.weather_code[i]),
+          air_quality: { pm2_5: 0, pm10: 0, no2: 0, ozone: 0, aqi: 0 },
+          sunrise: sun?.sunrise ?? null,
+          sunset: sun?.sunset ?? null,
+        };
+      });
 
       if (hour !== undefined) {
         const hourStr = hour.toString().padStart(2, "0");

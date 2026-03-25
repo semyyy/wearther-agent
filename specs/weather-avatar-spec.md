@@ -34,9 +34,10 @@ Par exemple :
 
 -   1 avatar unique
 -   Gestion basée sur :
-    -   Température
+    -   Température (avec feels_like)
     -   Précipitation
     -   Soleil / UV
+    -   Couverture nuageuse
 -   Règles simples avec priorités
 -   Système de calques (layers)
 
@@ -47,6 +48,10 @@ Par exemple :
 -   Mode nuit
 -   Animations (fade transition)
 -   Effets visuels (pluie / neige animée)
+-   Qualité de l'air (masque anti-pollution)
+-   Visibilité / Brouillard (écharpe, effets visuels)
+-   Éphémérides (lever/coucher soleil, phases de lune)
+-   Point de rosée (anticipation brouillard)
 
 ------------------------------------------------------------------------
 
@@ -55,11 +60,27 @@ Par exemple :
 ``` ts
 {
   temp_c: number,
+  feels_like_c: number,
   condition_code: "CLEAR" | "CLOUDS" | "RAIN" | "DRIZZLE" | "THUNDER" | "SNOW" | "FOG" | "WINDY",
   precip_probability: number,
   wind_kph: number,
   uv_index: number,
-  is_day: boolean
+  is_day: boolean,
+  cloud_cover_pct: number,
+  visibility_km: number,
+  dew_point_c: number,
+  air_quality: {
+    pm2_5: number,
+    pm10: number,
+    no2: number,
+    ozone: number,
+    aqi_index: number
+  },
+  ephemeris: {
+    sunrise: string,       // ISO time "HH:mm"
+    sunset: string,        // ISO time "HH:mm"
+    moon_phase: "new" | "waxing_crescent" | "first_quarter" | "waxing_gibbous" | "full" | "waning_gibbous" | "last_quarter" | "waning_crescent"
+  }
 }
 ```
 
@@ -85,10 +106,11 @@ L'avatar est composé de :
 1.  Base
 2.  Haut
 3.  Bas
-4.  Accessoires tête
-5.  Lunettes
-6.  Accessoires main
-7.  Effets
+4.  Cou (écharpe)
+5.  Accessoires tête
+6.  Lunettes / Masque
+7.  Accessoires main
+8.  Effets (pluie / neige / brouillard)
 
 ------------------------------------------------------------------------
 
@@ -131,13 +153,70 @@ Actions : - Bonnet - Manteau - Pas de parapluie
 
 ------------------------------------------------------------------------
 
+### 5.5 Température Ressentie ("Feels like")
+
+La température ressentie (`feels_like_c`) remplace `temp_c` pour le choix des vêtements lorsqu'elle est disponible.
+Elle combine l'effet du vent (wind chill) et de l'humidité (heat index).
+
+Règle : - Utiliser `feels_like_c` au lieu de `temp_c` dans les seuils du §5.1 pour déterminer le haut et le bas.
+- Exemple : si `temp_c = 12°C` mais `feels_like_c = 7°C` → l'avatar porte un Manteau (seuil < 10°C).
+
+------------------------------------------------------------------------
+
+### 5.6 Qualité de l'Air
+
+Déclencheur : - `air_quality.aqi_index` ≥ 100 (catégorie "Mauvais pour les groupes sensibles" et au-delà)
+
+Actions :
+- `aqi_index` 100–150 → Masque anti-pollution (léger)
+- `aqi_index` > 150 → Masque anti-pollution (renforcé)
+
+Note : Open-Meteo propose une API dédiée pour les indices de pollution (PM2.5, PM10, NO2, ozone).
+
+------------------------------------------------------------------------
+
+### 5.7 Visibilité & Brouillard
+
+Déclencheur : - `visibility_km` < 1 OU (`condition_code == FOG`)
+
+Actions :
+- Écharpe remontée / col relevé (indicateur visuel de brouillard)
+- Pas de lunettes de soleil (même si UV élevé)
+
+Complément : le Point de Rosée (`dew_point_c`) peut être utilisé pour anticiper le brouillard :
+- Si `dew_point_c` est proche de `temp_c` (écart ≤ 2°C) et `wind_kph` < 10 → risque de brouillard.
+
+------------------------------------------------------------------------
+
+### 5.8 Couverture Nuageuse
+
+La valeur `cloud_cover_pct` permet d'affiner le comportement soleil/UV (§5.3) :
+
+- `cloud_cover_pct` ≤ 20% → Ciel clair : règles soleil/UV appliquées normalement
+- `cloud_cover_pct` 21–70% → Partiellement nuageux : lunettes de soleil si UV ≥ 6, pas de casquette
+- `cloud_cover_pct` > 70% → Couvert : pas de lunettes de soleil, pas de casquette (sauf pluie)
+
+------------------------------------------------------------------------
+
+### 5.9 Éphémérides
+
+Les données `ephemeris.sunrise` et `ephemeris.sunset` permettent de déterminer `is_day` de manière précise.
+
+Utilisation :
+- Affichage des heures de lever/coucher du soleil dans la réponse de l'agent.
+- `ephemeris.moon_phase` : affichée dans la réponse en mode nuit (V1), influence potentielle sur l'ambiance visuelle de l'avatar (fond/effets).
+
+------------------------------------------------------------------------
+
 ## 6. ⚖️ Priorités
 
 1.  Neige / Froid extrême
-2.  Pluie + Vent fort
-3.  Pluie
-4.  Soleil / UV
-5.  Température
+2.  Qualité de l'air (AQI > 150)
+3.  Pluie + Vent fort
+4.  Pluie
+5.  Visibilité / Brouillard
+6.  Soleil / UV (modulé par couverture nuageuse)
+7.  Température (basée sur feels_like_c)
 
 ------------------------------------------------------------------------
 
@@ -150,7 +229,9 @@ type Look = {
   head: "none" | "cap" | "beanie" | "hood",
   eyes: "none" | "sunglasses",
   hand: "none" | "umbrella",
-  effects?: ("rain" | "snow")[]
+  face: "none" | "mask_light" | "mask_heavy",
+  neck: "none" | "scarf_up",
+  effects?: ("rain" | "snow" | "fog")[]
 }
 ```
 
@@ -166,7 +247,13 @@ const CONFIG = {
   RAIN_PROB_THRESHOLD: 40,
   WIND_UMBRELLA_LIMIT: 25,
   UV_SUNGLASSES: 6,
-  UV_CAP: 7
+  UV_CAP: 7,
+  AQI_MASK_LIGHT: 100,
+  AQI_MASK_HEAVY: 150,
+  VISIBILITY_FOG_KM: 1,
+  DEW_POINT_FOG_DELTA: 2,
+  CLOUD_CLEAR_MAX: 20,
+  CLOUD_PARTIAL_MAX: 70
 }
 ```
 
@@ -197,23 +284,37 @@ const CONFIG = {
 -   access_beanie.png
 -   access_umbrella.png
 
+### Visage / Cou
+
+-   face_mask_light.png
+-   face_mask_heavy.png
+-   neck_scarf_up.png
+
 ### Effets (optionnel)
 
 -   fx_rain.png
 -   fx_snow.png
+-   fx_fog.png
 
 ------------------------------------------------------------------------
 
 ## 10. 🧪 Tests
 
-  Cas                   Input                           Résultat Attendu
-  --------------------- ------------------------------- ------------------
-  30°C, clear, UV 8     Short + Lunettes + Casquette    
-  22°C, clouds          Pantalon + T-shirt              
-  28°C, rain, wind 10   Short + Parapluie               
-  15°C, rain, wind 35   Pantalon + Pull + Imperméable   
-  1°C, snow             Manteau + Bonnet                
-  12°C, fog             Pantalon + Pull                 
+  Cas                                        Input                                              Résultat Attendu
+  ------------------------------------------ -------------------------------------------------- ------------------------------------
+  30°C, clear, UV 8                          Short + Lunettes + Casquette                       ✅
+  22°C, clouds                               Pantalon + T-shirt                                 ✅
+  28°C, rain, wind 10                        Short + Parapluie                                  ✅
+  15°C, rain, wind 35                        Pantalon + Pull + Imperméable                      ✅
+  1°C, snow                                  Manteau + Bonnet                                   ✅
+  12°C, fog                                  Pantalon + Pull                                    ✅
+  12°C feels_like 7°C, clear                 Pantalon + Manteau (feels_like < 10)               ✅
+  25°C, AQI 120                              Masque léger                                       ✅
+  25°C, AQI 180                              Masque renforcé                                    ✅
+  10°C, fog, visibility 0.5km               Pantalon + Pull + Écharpe + pas de lunettes        ✅
+  22°C, clear, cloud_cover 50%              Pantalon + T-shirt + Lunettes (UV≥6) sans casquette✅
+  22°C, clear, cloud_cover 90%              Pantalon + T-shirt, pas de lunettes                ✅
+  8°C, dew_point 7°C, wind 5kph            Pantalon + Manteau + Écharpe (risque brouillard)   ✅
 
 ------------------------------------------------------------------------
 
@@ -276,6 +377,156 @@ Les réponses de l'agent dans le chat doivent être **bien formatées et agréab
 - Affiche les cartes météo (WeatherCard, WeatherFocusCard)
 - Zone scrollable indépendamment pour parcourir les différents graphiques
 - Les visualisations se mettent à jour automatiquement en fonction de la réponse de l'agent
+
+### 11.5 Diagrammes par Type de Donnée
+
+Chaque type de donnée météo dispose de son **propre diagramme dédié** dans la zone Diagrammes (75%).
+Les diagrammes sont affichés dans une grille responsive et se mettent à jour en temps réel.
+
+#### 11.5.1 Température & Température Ressentie
+
+- **Type** : Line Chart (double courbe)
+- **Courbe 1** : `temp_c` — trait plein
+- **Courbe 2** : `feels_like_c` — trait pointillé
+- **Axe X** : Heures (vue journée) ou Jours (vue semaine)
+- **Axe Y** : °C
+- **Couleurs** : dégradé bleu (froid) → orange → rouge (chaud)
+- **Zones colorées** : bandes horizontales pour les seuils (< 10°C bleu, 10-17°C vert, 18-25°C jaune, ≥ 26°C rouge)
+- **Tooltip** : température exacte + feels_like + écart
+
+#### 11.5.2 Précipitations
+
+- **Type** : Bar Chart (barres verticales) + Line overlay
+- **Barres** : quantité de précipitations (mm/h)
+- **Ligne superposée** : `precip_probability` (%)
+- **Axe X** : Heures / Jours
+- **Axe Y gauche** : mm/h
+- **Axe Y droit** : % probabilité
+- **Couleurs barres** : bleu clair (bruine) → bleu foncé (forte pluie) → blanc (neige)
+- **Icônes** : gouttes / flocons selon `condition_code`
+
+#### 11.5.3 Vent
+
+- **Type** : Line Chart + flèches directionnelles
+- **Courbe** : `wind_kph`
+- **Axe X** : Heures / Jours
+- **Axe Y** : km/h
+- **Seuils visuels** : ligne pointillée à 25 km/h (seuil parapluie/imperméable)
+- **Flèches** : direction du vent affichée à intervalles réguliers sur la courbe
+- **Couleurs** : vert (calme) → jaune (modéré) → rouge (fort, ≥ 25 km/h)
+
+#### 11.5.4 Indice UV
+
+- **Type** : Area Chart (courbe remplie)
+- **Courbe** : `uv_index` au fil de la journée
+- **Axe X** : Heures (06h–20h, calé sur sunrise/sunset)
+- **Axe Y** : Index UV (0–11+)
+- **Zones colorées** :
+  - 0–2 : vert (faible)
+  - 3–5 : jaune (modéré)
+  - 6–7 : orange (élevé) — seuil lunettes
+  - 8–10 : rouge (très élevé) — seuil casquette
+  - 11+ : violet (extrême)
+- **Marqueurs** : lignes pointillées aux seuils CONFIG (UV_SUNGLASSES=6, UV_CAP=7)
+
+#### 11.5.5 Qualité de l'Air (AQI)
+
+- **Type** : Gauge Chart (jauge circulaire) + Bar Chart détaillé
+- **Jauge** : `aqi_index` global avec zones colorées :
+  - 0–50 : vert (bon)
+  - 51–100 : jaune (modéré)
+  - 101–150 : orange (mauvais pour sensibles) — seuil masque léger
+  - 151–200 : rouge (mauvais) — seuil masque renforcé
+  - 201–300 : violet (très mauvais)
+  - 300+ : marron (dangereux)
+- **Barres détaillées** : 4 barres horizontales pour PM2.5, PM10, NO2, Ozone avec seuils OMS
+- **Source** : API Open-Meteo Air Quality
+
+#### 11.5.6 Couverture Nuageuse
+
+- **Type** : Area Chart (courbe remplie semi-transparente)
+- **Courbe** : `cloud_cover_pct` (0–100%)
+- **Axe X** : Heures / Jours
+- **Axe Y** : % couverture
+- **Zones** :
+  - 0–20% : fond clair (ciel dégagé)
+  - 21–70% : fond gris léger (partiellement nuageux)
+  - 71–100% : fond gris foncé (couvert)
+- **Icônes** : soleil / soleil-nuage / nuage selon le palier
+
+#### 11.5.7 Visibilité
+
+- **Type** : Line Chart
+- **Courbe** : `visibility_km`
+- **Axe X** : Heures / Jours
+- **Axe Y** : km (échelle log si nécessaire pour distinguer les faibles valeurs)
+- **Seuil critique** : ligne rouge pointillée à 1 km (seuil brouillard)
+- **Zone danger** : fond rouge semi-transparent sous 1 km
+- **Couleurs** : rouge (< 1 km) → orange (1–5 km) → vert (> 5 km)
+
+#### 11.5.8 Point de Rosée
+
+- **Type** : Line Chart (double courbe)
+- **Courbe 1** : `temp_c` — trait plein
+- **Courbe 2** : `dew_point_c` — trait pointillé bleu
+- **Zone de risque** : quand l'écart temp – dew_point ≤ 2°C, zone surlignée en gris (risque brouillard)
+- **Axe X** : Heures / Jours
+- **Axe Y** : °C
+- **Tooltip** : temp, dew_point, écart, indicateur "risque brouillard" si applicable
+
+#### 11.5.9 Éphémérides
+
+- **Type** : Arc / Timeline visuel
+- **Arc solaire** : demi-cercle montrant la trajectoire du soleil entre `sunrise` et `sunset`
+  - Position actuelle du soleil sur l'arc
+  - Durée du jour affichée au centre
+  - Heures de lever / coucher aux extrémités
+- **Phase de lune** : icône visuelle de la phase (`moon_phase`) avec libellé
+- **Données** : prochains lever/coucher, durée nuit, % illumination lune
+
+#### 11.5.10 Disposition des Diagrammes
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    ZONE DIAGRAMMES (75%)                     │
+│                                                             │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐  │
+│  │  Température & Ressentie│  │  Précipitations          │  │
+│  │  (Line Chart)           │  │  (Bar + Line)            │  │
+│  └─────────────────────────┘  └─────────────────────────┘  │
+│                                                             │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐  │
+│  │  Vent                   │  │  Indice UV               │  │
+│  │  (Line + Flèches)      │  │  (Area Chart)            │  │
+│  └─────────────────────────┘  └─────────────────────────┘  │
+│                                                             │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐  │
+│  │  Qualité de l'Air (AQI) │  │  Couverture Nuageuse     │  │
+│  │  (Gauge + Barres)       │  │  (Area Chart)            │  │
+│  └─────────────────────────┘  └─────────────────────────┘  │
+│                                                             │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐  │
+│  │  Visibilité             │  │  Point de Rosée          │  │
+│  │  (Line Chart)           │  │  (Line Chart double)     │  │
+│  └─────────────────────────┘  └─────────────────────────┘  │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  Éphémérides (Arc solaire + Phase de lune)            │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 11.5.11 Règles d'affichage
+
+- Les diagrammes sont affichés en **grille 2 colonnes** sur écran large
+- Sur tablette : **1 colonne**
+- Chaque diagramme possède un **header** avec titre + icône + valeur actuelle
+- **Affichage conditionnel** : seuls les diagrammes pertinents à la réponse de l'agent sont affichés
+  - Exemple : si la question porte sur "est-ce qu'il va pleuvoir ?", afficher en priorité Précipitations + Vent + Couverture Nuageuse
+  - L'agent décide quels diagrammes afficher via le champ `diagrams` dans sa réponse
+- **Période** : chaque diagramme supporte les vues Journée (24h) et Semaine (7j), synchronisées
+- **Interactivité** : hover/tooltip sur chaque point de donnée, zoom possible
 
 ### 11.4 Comportement responsive
 

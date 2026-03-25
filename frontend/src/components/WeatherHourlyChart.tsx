@@ -43,6 +43,16 @@ export default function WeatherHourlyChart({ entries }: Props) {
         pointRadius: 2,
       },
       {
+        label: "Feels Like (°C)",
+        data: entries.map((e) => e.feels_like_celsius ?? e.temperature_celsius),
+        borderColor: "#FF8A65",
+        backgroundColor: "rgba(255, 138, 101, 0.1)",
+        borderDash: [5, 3],
+        yAxisID: "y",
+        tension: 0.3,
+        pointRadius: 1,
+      },
+      {
         label: "Humidity (%)",
         data: entries.map((e) => e.relative_humidity_percent),
         borderColor: "#64B5F6",
