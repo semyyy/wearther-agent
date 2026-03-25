@@ -327,16 +327,16 @@ métier et UI - Facilement extensible
 
 ## 11. 🖥️ Layout de l'Interface
 
-L'interface principale est divisée en **2 zones distinctes** :
+L'interface principale est divisée en **2 zones distinctes**, **sans headers superflus** :
 
+- **Pas de header global** "Weather Assistant" : l'espace est entièrement dédié au contenu.
+- **Pas de header "Chat"** ni de header "Diagrams" : les zones parlent d'elles-mêmes, les headers sont supprimés pour maximiser l'espace utile.
 - La zone **Chat** (~25%) inclut l'avatar directement dans les réponses du chat.
 - La zone **Diagrammes occupe 75% de la largeur** de l'écran (zone principale).
 - ⚠️ **Le panel Réponse séparé est supprimé.** L'avatar et la réponse de l'agent sont intégrés directement dans le flux de conversation du chat.
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                         HEADER / Navbar                          │
-├────────────┬─────────────────────────────────────────────────────┤
+┌────────────┬─────────────────────────────────────────────────────┐
 │            │                                                     │
 │   CHAT     │              DIAGRAMMES                             │
 │   (~25%)   │              (75% écran)                            │
@@ -349,16 +349,23 @@ L'interface principale est divisée en **2 zones distinctes** :
 │  formatée  │                                                     │
 │  de l'agent│                                                     │
 │            │                                                     │
-├────────────┴─────────────────────────────────────────────────────┤
-│                        FOOTER (optionnel)                        │
-└──────────────────────────────────────────────────────────────────┘
+│  [Input]   │                                                     │
+└────────────┴─────────────────────────────────────────────────────┘
 ```
+
+### 11.0 Suppression des headers
+
+- **Header global (Navbar)** : **SUPPRIMÉ**. Il prenait de la place inutilement. L'application est immersive et plein écran.
+- **Header "Chat"** (icône + titre "Chat") : **SUPPRIMÉ**. La zone chat est identifiable par son contenu (messages + input).
+- **Header "Diagrams"** (icône + titre "Diagrams") : **SUPPRIMÉ**. La zone diagrammes est identifiable par ses graphiques.
+- L'espace récupéré est redistribué au contenu (messages, graphiques).
 
 ### 11.1 Zone Chat (gauche, ~25%)
 
 - Zone de conversation / saisie de l'utilisateur
 - Historique des messages envoyés
 - Input texte en bas de la zone
+- **Pas de header** : le chat commence directement par les messages
 - **L'avatar est affiché directement dans chaque réponse de l'agent** (au-dessus du texte de réponse), avec les vêtements adaptés à la météo (cf. §5)
 - L'avatar se met à jour à chaque nouvelle réponse météo
 
@@ -373,6 +380,7 @@ Les réponses de l'agent dans le chat doivent être **bien formatées et agréab
 ### 11.3 Zone Diagrammes (droite, **75% de l'écran**)
 
 - **Occupe 75% de la largeur** de l'écran pour maximiser la lisibilité des graphiques
+- **Pas de header** : les graphiques commencent directement, sans titre "Diagrams" en haut
 - Affiche les graphiques météo (température, humidité, vent, précipitations)
 - Affiche les cartes météo (WeatherCard, WeatherFocusCard)
 - Zone scrollable indépendamment pour parcourir les différents graphiques
@@ -530,9 +538,10 @@ Les diagrammes sont affichés dans une grille responsive et se mettent à jour e
 
 ### 11.4 Comportement responsive
 
-- Sur écran large (>= 1280px) : 2 zones côte à côte (25% | 75%)
-- Sur écran moyen (768px-1279px) : 2 lignes — Chat en haut, Diagrammes pleine largeur en bas
-- Sur mobile (< 768px) : Empilement vertical (Chat -> Diagrammes)
+- Sur écran large (>= 1280px) : 2 zones côte à côte (25% | 75%), sans aucun header
+- Sur écran moyen (768px-1279px) : 2 lignes — Chat en haut, Diagrammes pleine largeur en bas, sans headers
+- Sur mobile (< 768px) : Empilement vertical (Chat -> Diagrammes), sans headers
+- L'application occupe 100% de la hauteur de l'écran (full viewport)
 
 ------------------------------------------------------------------------
 

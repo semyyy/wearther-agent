@@ -11,10 +11,6 @@ interface Props {
 export default function DiagramsPanel({ toolData }: Props) {
   return (
     <div className={styles.diagramsPanel}>
-      <div className={styles.panelHeader}>
-        <span className={styles.panelIcon}>&#128200;</span>
-        <span className={styles.panelTitle}>Diagrams</span>
-      </div>
       <div className={styles.diagramsContent}>
         {toolData ? (
           <>
